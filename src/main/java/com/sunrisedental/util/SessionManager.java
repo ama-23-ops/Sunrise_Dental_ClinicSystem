@@ -1,5 +1,6 @@
 package com.sunrisedental.util;
 import com.sunrisedental.model.User;
+
 public final class SessionManager {
     private static User currentUser;
     private SessionManager(){}

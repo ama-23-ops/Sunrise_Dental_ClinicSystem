@@ -22,6 +22,7 @@ public class LoginForm extends javax.swing.JFrame {
     public LoginForm() {
         initComponents();
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -49,13 +50,11 @@ public class LoginForm extends javax.swing.JFrame {
 
         lblPassword.setText("Password");
 
-        btnLogin.setText("SAVE");
+        btnLogin.setText("LOGIN");
         btnLogin.addActionListener(this::btnLoginActionPerformed);
 
         btnClear.setText("CLEAR");
         btnClear.addActionListener(this::btnClearActionPerformed);
-
-        lblMessage.setText("jLabel4");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -102,7 +101,7 @@ public class LoginForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnLogin)
                     .addComponent(btnClear))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                 .addComponent(lblMessage)
                 .addGap(49, 49, 49))
         );
@@ -133,7 +132,7 @@ public class LoginForm extends javax.swing.JFrame {
             );
 
             DashboardForm dashboard =
-                    new DashboardForm();
+                new DashboardForm(user);
 
             dashboard.setVisible(true);
 

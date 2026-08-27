@@ -4,6 +4,7 @@
  */
 package com.sunrisedental.gui;
 
+import com.sunrisedental.model.User;
 import com.sunrisedental.util.SessionManager;
 import javax.swing.JOptionPane;
 
@@ -13,14 +14,47 @@ import javax.swing.JOptionPane;
  */
 public class DashboardForm extends javax.swing.JFrame {
     
+    private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DashboardForm.class.getName());
-
+    
     /**
      * Creates new form DashboardForm
      */
     public DashboardForm() {
         initComponents();
     }
+    
+    public DashboardForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+
+    setupUserAccess();
+
+    setLocationRelativeTo(null);
+}
+    
+    private void setupUserAccess() {
+
+    lblWelcome.setText(
+            "Welcome, "
+            + currentUser.getFullName()
+            + " ("
+            + currentUser.getRole()
+            + ")"
+    );
+
+    boolean isAdmin =
+            currentUser.getRole()
+            .equalsIgnoreCase("ADMIN");
+
+    btnDentists.setVisible(isAdmin);
+
+    btnTreatments.setVisible(isAdmin);
+
+    btnUsers.setVisible(isAdmin);
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -38,6 +72,9 @@ public class DashboardForm extends javax.swing.JFrame {
         btnBilling = new javax.swing.JButton();
         btnReports = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        btnDentists = new javax.swing.JButton();
+        btnTreatments = new javax.swing.JButton();
+        btnUsers = new javax.swing.JButton();
         pnlContent = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         lblTotalPatients = new javax.swing.JLabel();
@@ -68,6 +105,15 @@ public class DashboardForm extends javax.swing.JFrame {
         btnLogout.setText("LOGOUT       ");
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
 
+        btnDentists.setText("DENTISTS ");
+        btnDentists.addActionListener(this::btnDentistsActionPerformed);
+
+        btnTreatments.setText("TREATMENTS ");
+        btnTreatments.addActionListener(this::btnTreatmentsActionPerformed);
+
+        btnUsers.setText("USERS ");
+        btnUsers.addActionListener(this::btnUsersActionPerformed);
+
         javax.swing.GroupLayout pnlMenuLayout = new javax.swing.GroupLayout(pnlMenu);
         pnlMenu.setLayout(pnlMenuLayout);
         pnlMenuLayout.setHorizontalGroup(
@@ -75,12 +121,19 @@ public class DashboardForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMenuLayout.createSequentialGroup()
                 .addContainerGap(83, Short.MAX_VALUE)
                 .addGroup(pnlMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnLogout)
-                    .addComponent(btnReports)
                     .addComponent(btnBilling)
                     .addComponent(btnAppointments)
                     .addComponent(btnPatients)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1)
+                    .addGroup(pnlMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(btnDentists)
+                        .addComponent(btnReports)
+                        .addGroup(pnlMenuLayout.createSequentialGroup()
+                            .addGap(6, 6, 6)
+                            .addComponent(btnTreatments)))
+                    .addGroup(pnlMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(btnUsers)
+                        .addComponent(btnLogout)))
                 .addGap(71, 71, 71))
         );
         pnlMenuLayout.setVerticalGroup(
@@ -94,8 +147,14 @@ public class DashboardForm extends javax.swing.JFrame {
                 .addComponent(btnAppointments)
                 .addGap(18, 18, 18)
                 .addComponent(btnBilling)
-                .addGap(36, 36, 36)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnReports)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnDentists)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnTreatments)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnUsers)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnLogout)
                 .addGap(55, 55, 55))
@@ -215,6 +274,60 @@ public class DashboardForm extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_btnLogoutActionPerformed
 
+    private void btnTreatmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTreatmentsActionPerformed
+        // TODO add your handling code here:
+        if (!currentUser.getRole()
+            .equalsIgnoreCase("ADMIN")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Access denied. "
+                + "Administrator privileges required."
+        );
+
+        return;
+    }
+
+    new TreatmentForm().setVisible(true);
+    }//GEN-LAST:event_btnTreatmentsActionPerformed
+
+    private void btnUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsersActionPerformed
+        // TODO add your handling code here:
+       if (!currentUser.getRole()
+            .equalsIgnoreCase("ADMIN")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Access denied. "
+                + "Administrator privileges required."
+        );
+
+        return;
+    }
+
+    UserForm userForm =
+            new UserForm(currentUser);
+
+    userForm.setVisible(true);
+    }//GEN-LAST:event_btnUsersActionPerformed
+
+    private void btnDentistsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDentistsActionPerformed
+        // TODO add your handling code here:
+        if (!currentUser.getRole()
+            .equalsIgnoreCase("ADMIN")) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Access denied. "
+                + "Administrator privileges required."
+        );
+
+        return;
+    }
+
+    new DentistForm().setVisible(true);
+    }//GEN-LAST:event_btnDentistsActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -243,9 +356,12 @@ public class DashboardForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAppointments;
     private javax.swing.JButton btnBilling;
+    private javax.swing.JButton btnDentists;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnPatients;
     private javax.swing.JButton btnReports;
+    private javax.swing.JButton btnTreatments;
+    private javax.swing.JButton btnUsers;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel lblRevenue;
