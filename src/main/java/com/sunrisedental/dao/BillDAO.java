@@ -1,6 +1,7 @@
 package com.sunrisedental.dao;
 import com.sunrisedental.model.Bill;
 import com.sunrisedental.util.DBConnection;
+import java.math.BigDecimal;
 import java.sql.*;
 
 public class BillDAO {
@@ -36,4 +37,28 @@ public class BillDAO {
             }
     }
     }
+    public BigDecimal getTodayRevenue()
+        throws SQLException {
+
+    String sql =
+            "SELECT COALESCE(SUM(total_amount), 0) "
+            + "FROM bills "
+            + "WHERE DATE(bill_date) = CURRENT_DATE "
+            + "AND payment_status = 'PAID'";
+
+    try (Connection connection =
+            DBConnection.getConnection();
+         PreparedStatement statement =
+            connection.prepareStatement(sql);
+         ResultSet resultSet =
+            statement.executeQuery()) {
+
+        if (resultSet.next()) {
+
+            return resultSet.getBigDecimal(1);
+        }
+    }
+
+    return BigDecimal.ZERO;
+}
 }

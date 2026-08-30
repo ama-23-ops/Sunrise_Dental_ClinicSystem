@@ -4,9 +4,23 @@
  */
 package com.sunrisedental.gui;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sunrisedental.model.User;
 import com.sunrisedental.util.SessionManager;
 import javax.swing.JOptionPane;
+import com.sunrisedental.client.DashboardApiClient;
+import com.sunrisedental.model.DashboardStats;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.http.HttpResponse;
+
+import javax.swing.JOptionPane;
+import com.sunrisedental.client.ReportApiClient;
+import com.sunrisedental.report.AppointmentDetails;
+import java.time.LocalDate;
+import java.util.List;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -16,6 +30,20 @@ public class DashboardForm extends javax.swing.JFrame {
     
     private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DashboardForm.class.getName());
+    private final DashboardApiClient dashboardApiClient =
+        new DashboardApiClient();
+    
+    private final ReportApiClient reportApiClient =
+        new ReportApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
     
     /**
      * Creates new form DashboardForm
@@ -31,7 +59,13 @@ public class DashboardForm extends javax.swing.JFrame {
     this.currentUser = currentUser;
 
     setupUserAccess();
-
+    
+    setupTodayAppointmentsTable();
+    
+    loadDashboardStats();
+    
+    loadTodayAppointments();
+    
     setLocationRelativeTo(null);
 }
     
@@ -55,6 +89,189 @@ public class DashboardForm extends javax.swing.JFrame {
 
     btnUsers.setVisible(isAdmin);
 }
+    
+    private void loadDashboardStats() {
+
+    try {
+
+        HttpResponse<String> response =
+                dashboardApiClient.getStats();
+
+        if (response.statusCode() != 200) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load dashboard statistics.\n"
+                    + "HTTP Status: "
+                    + response.statusCode()
+                    + "\n\n"
+                    + response.body(),
+                    "Dashboard Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+        DashboardStats stats =
+                objectMapper.readValue(
+                        response.body(),
+                        DashboardStats.class
+                );
+
+
+        // ==========================================
+        // UPDATE DASHBOARD CARDS
+        // ==========================================
+
+        lblTotalPatients.setText(
+                String.valueOf(
+                        stats.getTotalPatients()
+                )
+        );
+
+        lblTodayAppointments.setText(
+                String.valueOf(
+                        stats.getTodayAppointments()
+                )
+        );
+
+        lblRevenue.setText(
+                "Rs. "
+                + stats.getTodayRevenue()
+                        .setScale(
+                                2,
+                                java.math.RoundingMode.HALF_UP
+                        )
+                        .toPlainString()
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Unable to load dashboard data.\n\n"
+                + e.getMessage(),
+                "Dashboard Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+    
+    private void loadTodayAppointments() {
+
+    try {
+
+        String today =
+                LocalDate.now().toString();
+
+        HttpResponse<String> response =
+                reportApiClient
+                        .getDailyAppointments(today);
+
+
+        if (response.statusCode() != 200) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load today's appointments.\n"
+                    + "HTTP Status: "
+                    + response.statusCode(),
+                    "Dashboard Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+
+        List<AppointmentDetails> appointments =
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<
+                                List<AppointmentDetails>
+                        >() {}
+                );
+
+
+        DefaultTableModel model =
+                (DefaultTableModel)
+                tblTodayAppointments.getModel();
+
+
+        model.setRowCount(0);
+
+
+        for (AppointmentDetails appointment
+                : appointments) {
+
+            model.addRow(
+                    new Object[]{
+
+                        appointment.appointmentNo,
+
+                        appointment.patientName,
+
+                        appointment.dentistName,
+
+                        appointment.treatmentName,
+
+                        appointment.appointmentDate,
+
+                        appointment.appointmentTime,
+
+                        appointment.status
+                    }
+            );
+        }
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Unable to load today's appointments.\n\n"
+                + e.getMessage(),
+                "Dashboard Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+    
+    private void setupTodayAppointmentsTable() {
+
+    DefaultTableModel model =
+            new DefaultTableModel(
+                    new Object[][]{},
+                    new String[]{
+                        "Appointment No",
+                        "Patient",
+                        "Dentist",
+                        "Treatment",
+                        "Date",
+                        "Time",
+                        "Status"
+                    }
+            ) {
+
+        @Override
+        public boolean isCellEditable(
+                int row,
+                int column) {
+
+            return false;
+        }
+    };
+
+    tblTodayAppointments.setModel(model);
+
+    tblTodayAppointments.setRowHeight(28);
+
+    tblTodayAppointments
+            .setAutoResizeMode(
+                    javax.swing.JTable
+                            .AUTO_RESIZE_ALL_COLUMNS
+            );
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -77,9 +294,22 @@ public class DashboardForm extends javax.swing.JFrame {
         btnUsers = new javax.swing.JButton();
         pnlContent = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         lblTotalPatients = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
         lblTodayAppointments = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
         lblRevenue = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblTodayAppointments = new javax.swing.JTable();
         lblTitle = new javax.swing.JLabel();
         lblWelcome = new javax.swing.JLabel();
 
@@ -130,10 +360,12 @@ public class DashboardForm extends javax.swing.JFrame {
                         .addComponent(btnReports)
                         .addGroup(pnlMenuLayout.createSequentialGroup()
                             .addGap(6, 6, 6)
-                            .addComponent(btnTreatments)))
-                    .addGroup(pnlMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(btnLogout)
+                                .addComponent(btnTreatments))))
+                    .addGroup(pnlMenuLayout.createSequentialGroup()
                         .addComponent(btnUsers)
-                        .addComponent(btnLogout)))
+                        .addGap(26, 26, 26)))
                 .addGap(71, 71, 71))
         );
         pnlMenuLayout.setVerticalGroup(
@@ -155,40 +387,177 @@ public class DashboardForm extends javax.swing.JFrame {
                 .addComponent(btnTreatments)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnUsers)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(32, 32, 32)
                 .addComponent(btnLogout)
-                .addGap(55, 55, 55))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pnlContent.setBackground(new java.awt.Color(0, 102, 204));
 
-        jLabel3.setText(" WELCOME TO THE SYSTEM ");
+        jLabel3.setText("DASHBOARD OVERVIEW ");
+
+        jLabel1.setText("PATIENTS   ");
+
+        jLabel5.setText("Total      ");
+
+        lblTotalPatients.setText("totalp");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblTotalPatients, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(lblTotalPatients)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addContainerGap())
+        );
+
+        jLabel2.setText("APPOINMENTS");
+
+        jLabel6.setText("Today      ");
+
+        lblTodayAppointments.setText("appoi");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblTodayAppointments, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addComponent(lblTodayAppointments)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addContainerGap())
+        );
+
+        jLabel4.setText("REVENUE  ");
+
+        jLabel7.setText("Today      ");
+
+        lblRevenue.setText("rev");
+
+        jLabel8.setText("Rs:");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRevenue, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblRevenue, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel7)
+                .addContainerGap())
+        );
+
+        jLabel9.setText("Today's Appointments                ");
+
+        tblTodayAppointments.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Appointment No ", "Patient", "Dentist", "Treatment ", "Date ", "Time ", "Status"
+            }
+        ));
+        tblTodayAppointments.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        tblTodayAppointments.setRowHeight(28);
+        tblTodayAppointments.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane1.setViewportView(tblTodayAppointments);
 
         javax.swing.GroupLayout pnlContentLayout = new javax.swing.GroupLayout(pnlContent);
         pnlContent.setLayout(pnlContentLayout);
         pnlContentLayout.setHorizontalGroup(
             pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlContentLayout.createSequentialGroup()
-                .addGap(143, 143, 143)
-                .addGroup(pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
-                    .addComponent(lblTotalPatients, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTodayAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblRevenue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(89, Short.MAX_VALUE))
+                .addGroup(pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlContentLayout.createSequentialGroup()
+                        .addGap(115, 115, 115)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pnlContentLayout.createSequentialGroup()
+                        .addGap(46, 46, 46)
+                        .addGroup(pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContentLayout.createSequentialGroup()
+                .addGroup(pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(pnlContentLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlContentLayout.createSequentialGroup()
+                        .addGap(208, 208, 208)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(31, 31, 31))
         );
         pnlContentLayout.setVerticalGroup(
             pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlContentLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(23, 23, 23)
                 .addComponent(jLabel3)
-                .addGap(45, 45, 45)
-                .addComponent(lblTotalPatients)
+                .addGap(48, 48, 48)
+                .addGroup(pnlContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(39, 39, 39)
+                .addComponent(jLabel9)
                 .addGap(18, 18, 18)
-                .addComponent(lblTodayAppointments)
-                .addGap(28, 28, 28)
-                .addComponent(lblRevenue)
-                .addContainerGap(286, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(51, Short.MAX_VALUE))
         );
 
         lblTitle.setText("SUNRISE DENTAL CLINIC");
@@ -207,14 +576,14 @@ public class DashboardForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(102, 102, 102)
                 .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblWelcome, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(96, 96, 96))
+                .addGap(18, 18, 18)
+                .addComponent(lblWelcome, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(152, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTitle)
                     .addComponent(lblWelcome))
@@ -222,8 +591,8 @@ public class DashboardForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlMenu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 62, Short.MAX_VALUE)
-                        .addComponent(pnlContent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(pnlContent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -237,22 +606,26 @@ public class DashboardForm extends javax.swing.JFrame {
 
     private void btnAppointmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAppointmentsActionPerformed
         // TODO add your handling code here:
-        new AppointmentForm().setVisible(true);
+        new AppointmentForm(currentUser).setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnAppointmentsActionPerformed
 
     private void btnPatientsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPatientsActionPerformed
         // TODO add your handling code here:
-        new PatientForm().setVisible(true);
+        new PatientForm(currentUser).setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnPatientsActionPerformed
 
     private void btnBillingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBillingActionPerformed
         // TODO add your handling code here:
-        new BillingForm().setVisible(true);
+        new BillingForm(currentUser).setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnBillingActionPerformed
 
     private void btnReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsActionPerformed
         // TODO add your handling code here:
-        new ReportsForm().setVisible(true);
+        new ReportsForm(currentUser).setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnReportsActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
@@ -288,7 +661,7 @@ public class DashboardForm extends javax.swing.JFrame {
         return;
     }
 
-    new TreatmentForm().setVisible(true);
+    new TreatmentForm(currentUser).setVisible(true);
     }//GEN-LAST:event_btnTreatmentsActionPerformed
 
     private void btnUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsersActionPerformed
@@ -325,7 +698,7 @@ public class DashboardForm extends javax.swing.JFrame {
         return;
     }
 
-    new DentistForm().setVisible(true);
+    new DentistForm(currentUser).setVisible(true);
     }//GEN-LAST:event_btnDentistsActionPerformed
 
     /**
@@ -363,7 +736,19 @@ public class DashboardForm extends javax.swing.JFrame {
     private javax.swing.JButton btnTreatments;
     private javax.swing.JButton btnUsers;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRevenue;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JLabel lblTodayAppointments;
@@ -371,5 +756,6 @@ public class DashboardForm extends javax.swing.JFrame {
     private javax.swing.JLabel lblWelcome;
     private javax.swing.JPanel pnlContent;
     private javax.swing.JPanel pnlMenu;
+    private javax.swing.JTable tblTodayAppointments;
     // End of variables declaration//GEN-END:variables
 }

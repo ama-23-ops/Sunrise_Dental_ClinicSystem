@@ -131,6 +131,30 @@ public List<Appointment> findAll() throws SQLException {
 
     return appointments;
 }
+
+public int countTodayAppointments()
+        throws SQLException {
+
+    String sql =
+            "SELECT COUNT(*) "
+            + "FROM appointments "
+            + "WHERE appointment_date = CURRENT_DATE "
+            + "AND status <> 'CANCELLED'";
+
+    try (Connection connection =
+            DBConnection.getConnection();
+         PreparedStatement statement =
+            connection.prepareStatement(sql);
+         ResultSet resultSet =
+            statement.executeQuery()) {
+
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        }
+    }
+
+    return 0;
+}
 }
 
 

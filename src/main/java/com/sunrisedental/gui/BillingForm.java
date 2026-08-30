@@ -4,15 +4,22 @@
  */
 package com.sunrisedental.gui;
 
-import com.sunrisedental.dao.AppointmentDAO;
-import com.sunrisedental.dao.PatientDAO;
-import com.sunrisedental.dao.TreatmentDAO;
+import com.sunrisedental.client.AppointmentApiClient;
+import com.sunrisedental.client.BillingApiClient;
+import com.sunrisedental.client.PatientApiClient;
+import com.sunrisedental.client.TreatmentApiClient;
+
 import com.sunrisedental.model.Appointment;
 import com.sunrisedental.model.Bill;
 import com.sunrisedental.model.Patient;
 import com.sunrisedental.model.Treatment;
-import com.sunrisedental.service.BillingService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sunrisedental.model.User;
+
 import java.math.BigDecimal;
+import java.net.http.HttpResponse;
+
 import javax.swing.JOptionPane;
 
 
@@ -21,7 +28,7 @@ import javax.swing.JOptionPane;
  * @author iffah
  */
 public class BillingForm extends javax.swing.JFrame {
-    
+    private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BillingForm.class.getName());
 
     /**
@@ -29,8 +36,15 @@ public class BillingForm extends javax.swing.JFrame {
      */
     public BillingForm() {
         initComponents();
-        
-        setLocationRelativeTo(null);
+    }
+    
+    public BillingForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+
+    setLocationRelativeTo(null);
         txtBillNumber.setEditable(false);
         txtPatientName.setEditable(false);
         txtTreatmentName.setEditable(false);
@@ -47,19 +61,28 @@ public class BillingForm extends javax.swing.JFrame {
         cmbPaymentMethod.addItem("CASH");
         cmbPaymentMethod.addItem("CARD");
         cmbPaymentMethod.addItem("BANK_TRANSFER");
-    }
+}
     
-    private final AppointmentDAO appointmentDAO =
-        new AppointmentDAO();
+    private final AppointmentApiClient appointmentApiClient =
+        new AppointmentApiClient();
 
-    private final PatientDAO patientDAO =
-        new PatientDAO();
+private final PatientApiClient patientApiClient =
+        new PatientApiClient();
 
-    private final TreatmentDAO treatmentDAO =
-        new TreatmentDAO();
+private final TreatmentApiClient treatmentApiClient =
+        new TreatmentApiClient();
 
-    private final BillingService billingService =
-        new BillingService();
+private final BillingApiClient billingApiClient =
+        new BillingApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -92,6 +115,7 @@ public class BillingForm extends javax.swing.JFrame {
         cmbPaymentMethod = new javax.swing.JComboBox<>();
         txtBillNumber = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -135,6 +159,9 @@ public class BillingForm extends javax.swing.JFrame {
 
         jLabel10.setText("bill no");
 
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,7 +169,9 @@ public class BillingForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(216, 216, 216))
+                .addGap(90, 90, 90)
+                .addComponent(btnBack)
+                .addGap(51, 51, 51))
             .addGroup(layout.createSequentialGroup()
                 .addGap(84, 84, 84)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -192,8 +221,10 @@ public class BillingForm extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(39, 39, 39)
-                .addComponent(jLabel1)
+                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
+                    .addComponent(btnBack))
                 .addGap(41, 41, 41)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -260,12 +291,39 @@ public class BillingForm extends javax.swing.JFrame {
             );
         }
 
+
+        // ==========================================
+        // VALIDATE CONSULTATION FEE
+        // ==========================================
+
+        String consultationText =
+                txtConsultationFee
+                        .getText()
+                        .trim();
+
+        if (consultationText.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Please enter consultation fee."
+            );
+        }
+
         BigDecimal consultationFee =
                 new BigDecimal(
-                        txtConsultationFee
-                                .getText()
-                                .trim()
+                        consultationText
                 );
+
+        if (consultationFee.signum() < 0) {
+
+            throw new IllegalArgumentException(
+                    "Consultation fee cannot be negative."
+            );
+        }
+
+
+        // ==========================================
+        // PAYMENT DETAILS
+        // ==========================================
 
         String paymentStatus =
                 cmbPaymentStatus
@@ -277,28 +335,63 @@ public class BillingForm extends javax.swing.JFrame {
                         .getSelectedItem()
                         .toString();
 
-        Bill bill =
-                billingService.createBill(
+
+        // ==========================================
+        // CREATE BILL THROUGH REST
+        // ==========================================
+
+        HttpResponse<String> response =
+                billingApiClient.createBill(
                         appointmentNo,
-                        consultationFee,
+                        consultationFee.toPlainString(),
                         paymentStatus,
                         paymentMethod
                 );
 
-        txtBillNumber.setText(
-                bill.getBillNumber()
-        );
 
-        txtTotalAmount.setText(
-                bill.getTotalAmount()
-                        .toString()
-        );
+        // ==========================================
+        // SUCCESS
+        // ==========================================
+
+        if (response.statusCode() == 201) {
+
+            Bill bill =
+                    objectMapper.readValue(
+                            response.body(),
+                            Bill.class
+                    );
+
+            txtBillNumber.setText(
+                    bill.getBillNumber()
+            );
+
+            txtTotalAmount.setText(
+                    bill.getTotalAmount()
+                            .toPlainString()
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Bill generated successfully.\n"
+                    + "Bill Number: "
+                    + bill.getBillNumber()
+            );
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Billing Error"
+            );
+        }
+
+    } catch (NumberFormatException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Bill generated successfully.\n"
-                + "Bill Number: "
-                + bill.getBillNumber()
+                "Consultation fee must be a valid number.",
+                "Billing Error",
+                JOptionPane.ERROR_MESSAGE
         );
 
     } catch (Exception e) {
@@ -314,6 +407,21 @@ public class BillingForm extends javax.swing.JFrame {
 
     private void btnClearBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearBillActionPerformed
         // TODO add your handling code here:
+        txtSearchAppointmentNo.setText("");
+    txtPatientName.setText("");
+    txtTreatmentName.setText("");
+    txtTreatmentFee.setText("");
+    txtConsultationFee.setText("");
+    txtTotalAmount.setText("");
+    txtBillNumber.setText("");
+
+    cmbPaymentStatus.setSelectedItem(
+            "UNPAID"
+    );
+
+    cmbPaymentMethod.setSelectedItem(
+            "CASH"
+    );
     }//GEN-LAST:event_btnClearBillActionPerformed
 
     private void btnSearchAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchAppointmentActionPerformed
@@ -332,30 +440,100 @@ public class BillingForm extends javax.swing.JFrame {
             );
         }
 
-        Appointment appointment =
-                appointmentDAO.findByNo(
-                        appointmentNo
-                );
+        // ==========================================
+        // 1. SEARCH APPOINTMENT THROUGH REST
+        // ==========================================
 
-        if (appointment == null) {
+        HttpResponse<String> appointmentResponse =
+                appointmentApiClient
+                        .searchAppointment(
+                                appointmentNo
+                        );
+
+        if (appointmentResponse.statusCode() == 404) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Appointment not found."
+                    "Appointment not found.",
+                    "Search",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        if (appointmentResponse.statusCode() != 200) {
+
+            showApiError(
+                    appointmentResponse,
+                    "Appointment Search Error"
+            );
+
+            return;
+        }
+
+        Appointment appointment =
+                objectMapper.readValue(
+                        appointmentResponse.body(),
+                        Appointment.class
+                );
+
+
+        // ==========================================
+        // 2. GET PATIENT THROUGH REST
+        // ==========================================
+
+        HttpResponse<String> patientResponse =
+                patientApiClient.getPatient(
+                        appointment.getPatientId()
+                );
+
+        if (patientResponse.statusCode() != 200) {
+
+            showApiError(
+                    patientResponse,
+                    "Patient Error"
             );
 
             return;
         }
 
         Patient patient =
-                patientDAO.findById(
-                        appointment.getPatientId()
+                objectMapper.readValue(
+                        patientResponse.body(),
+                        Patient.class
                 );
 
-        Treatment treatment =
-                treatmentDAO.findById(
+
+        // ==========================================
+        // 3. GET TREATMENT THROUGH REST
+        // ==========================================
+
+        HttpResponse<String> treatmentResponse =
+                treatmentApiClient.getTreatment(
                         appointment.getTreatmentId()
                 );
+
+        if (treatmentResponse.statusCode() != 200) {
+
+            showApiError(
+                    treatmentResponse,
+                    "Treatment Error"
+            );
+
+            return;
+        }
+
+        Treatment treatment =
+                objectMapper.readValue(
+                        treatmentResponse.body(),
+                        Treatment.class
+                );
+
+
+        // ==========================================
+        // 4. DISPLAY INFORMATION
+        // ==========================================
 
         txtPatientName.setText(
                 patient.getFullName()
@@ -367,19 +545,35 @@ public class BillingForm extends javax.swing.JFrame {
 
         txtTreatmentFee.setText(
                 treatment.getTreatmentCost()
-                        .toString()
+                        .toPlainString()
         );
 
-        txtConsultationFee.setText("0.00");
+
+        // ==========================================
+        // 5. DEFAULT CONSULTATION FEE
+        // ==========================================
+
+        txtConsultationFee.setText(
+                "0.00"
+        );
+
+
+        // ==========================================
+        // 6. CALCULATE PREVIEW TOTAL
+        // ==========================================
 
         BigDecimal total =
-                billingService.calculateTotal(
-                        new BigDecimal("0.00"),
-                        treatment.getTreatmentCost()
-                );
+                treatment.getTreatmentCost()
+                        .add(
+                                new BigDecimal("0.00")
+                        )
+                        .setScale(
+                                2,
+                                java.math.RoundingMode.HALF_UP
+                        );
 
         txtTotalAmount.setText(
-                total.toString()
+                total.toPlainString()
         );
 
     } catch (Exception e) {
@@ -416,13 +610,15 @@ public class BillingForm extends javax.swing.JFrame {
                 );
 
         BigDecimal total =
-                billingService.calculateTotal(
-                        consultationFee,
-                        treatmentFee
-                );
+                consultationFee
+                        .add(treatmentFee)
+                        .setScale(
+                                2,
+                                java.math.RoundingMode.HALF_UP
+                        );
 
         txtTotalAmount.setText(
-                total.toString()
+                total.toPlainString()
         );
 
     } catch (Exception e) {
@@ -431,6 +627,35 @@ public class BillingForm extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_txtConsultationFeeKeyReleased
 
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+         goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    JOptionPane.showMessageDialog(
+            this,
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\nServer Response:\n"
+            + response.body(),
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
     /**
      * @param args the command line arguments
      */
@@ -457,6 +682,7 @@ public class BillingForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClearBill;
     private javax.swing.JButton btnGenerateBill;
     private javax.swing.JButton btnSearchAppointment;

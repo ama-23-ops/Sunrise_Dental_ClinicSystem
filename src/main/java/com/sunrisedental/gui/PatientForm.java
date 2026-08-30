@@ -4,10 +4,13 @@
  */
 package com.sunrisedental.gui;
 
-import com.sunrisedental.dao.PatientDAO;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sunrisedental.client.PatientApiClient;
 import com.sunrisedental.model.Patient;
-import com.sunrisedental.service.PatientService;
+import com.sunrisedental.model.User;
 
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -18,8 +21,18 @@ import javax.swing.table.DefaultTableModel;
  * @author iffah
  */
 public class PatientForm extends javax.swing.JFrame {
-    private final PatientDAO patientDAO = new PatientDAO();
-    private final PatientService patientService = new PatientService();
+    private User currentUser;
+    private final PatientApiClient patientApiClient =
+        new PatientApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PatientForm.class.getName());
 
     /**
@@ -27,14 +40,20 @@ public class PatientForm extends javax.swing.JFrame {
      */
     public PatientForm() {
         initComponents();
-        
-        setLocationRelativeTo(null);
-
-        txtPatientId.setEditable(false);
-
-        loadPatients();
     }
 
+    public PatientForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+    
+    setLocationRelativeTo(null);
+
+    txtPatientId.setEditable(false);
+
+    loadPatients();
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -70,6 +89,7 @@ public class PatientForm extends javax.swing.JFrame {
         btnClearPatient = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblPatients = new javax.swing.JTable();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addMouseListener(new java.awt.event.MouseAdapter() {
@@ -138,6 +158,9 @@ public class PatientForm extends javax.swing.JFrame {
         });
         jScrollPane2.setViewportView(tblPatients);
 
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -145,18 +168,6 @@ public class PatientForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(48, 48, 48)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnSavePatient)
-                        .addGap(44, 44, 44)
-                        .addComponent(btnUpdatePatient)
-                        .addGap(47, 47, 47)
-                        .addComponent(btnClearPatient))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSearchPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSearch))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -183,7 +194,24 @@ public class PatientForm extends javax.swing.JFrame {
                                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txtDateOfBirth, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnSavePatient)
+                                .addGap(44, 44, 44)
+                                .addComponent(btnUpdatePatient)
+                                .addGap(47, 47, 47)
+                                .addComponent(btnClearPatient))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtSearchPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnSearch)
+                                .addGap(218, 218, 218)
+                                .addComponent(btnBack)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -195,7 +223,8 @@ public class PatientForm extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
                             .addComponent(txtSearchPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnSearch))
+                            .addComponent(btnSearch)
+                            .addComponent(btnBack))
                         .addGap(39, 39, 39)
                         .addComponent(jLabel2)
                         .addGap(37, 37, 37)
@@ -249,7 +278,7 @@ public class PatientForm extends javax.swing.JFrame {
 
     private void btnSavePatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSavePatientActionPerformed
         // TODO add your handling code here:
-         try {
+        try {
 
         Patient patient = new Patient();
 
@@ -276,7 +305,8 @@ public class PatientForm extends javax.swing.JFrame {
         String dob =
                 txtDateOfBirth.getText().trim();
 
-        if (!dob.isEmpty()) {
+        if (!dob.isEmpty()
+                && !dob.equals("YYYY-MM-DD")) {
 
             patient.setDateOfBirth(
                     java.time.LocalDate.parse(dob)
@@ -284,23 +314,60 @@ public class PatientForm extends javax.swing.JFrame {
         }
 
         patient.setGender(
-                cmbGender.getSelectedItem().toString()
+                cmbGender.getSelectedItem()
+                        .toString()
+                        .trim()
         );
 
-        int generatedId =
-                patientService.save(patient);
+        String json =
+                objectMapper.writeValueAsString(
+                        patient
+                );
 
-        txtPatientId.setText(
-                String.valueOf(generatedId)
-        );
+        HttpResponse<String> response =
+                patientApiClient.createPatient(
+                        json
+                );
+
+        if (response.statusCode() == 201) {
+
+            Patient createdPatient =
+                    objectMapper.readValue(
+                            response.body(),
+                            Patient.class
+                    );
+
+            txtPatientId.setText(
+                    String.valueOf(
+                            createdPatient.getPatientId()
+                    )
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Patient saved successfully.\n"
+                    + "Patient ID: "
+                    + createdPatient.getPatientId()
+            );
+
+            loadPatients();
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Save Error"
+            );
+        }
+
+    } catch (java.time.format.DateTimeParseException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Patient saved successfully.\n"
-                + "Patient ID: " + generatedId
+                "Invalid date. Please use YYYY-MM-DD.",
+                "Save Error",
+                JOptionPane.ERROR_MESSAGE
         );
-
-        loadPatients();
 
     } catch (Exception e) {
 
@@ -331,33 +398,57 @@ public class PatientForm extends javax.swing.JFrame {
         String searchText =
                 txtSearchPatient.getText().trim();
 
-        List<Patient> patients =
-                patientDAO.searchByName(searchText);
+        if (searchText.isEmpty()) {
 
-        DefaultTableModel model =
-                (DefaultTableModel)
-                tblPatients.getModel();
-
-        model.setRowCount(0);
-
-        for (Patient patient : patients) {
-
-            model.addRow(new Object[]{
-
-                patient.getPatientId(),
-                patient.getFirstName(),
-                patient.getLastName(),
-                patient.getContactNumber(),
-                patient.getEmail()
-
-            });
+            loadPatients();
+            return;
         }
 
-        if (patients.isEmpty()) {
+        HttpResponse<String> response =
+                patientApiClient.searchPatients(
+                        searchText
+                );
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No patient found."
+        if (response.statusCode() == 200) {
+
+            List<Patient> patients =
+                    objectMapper.readValue(
+                            response.body(),
+                            new TypeReference<List<Patient>>() {}
+                    );
+
+            DefaultTableModel model =
+                    (DefaultTableModel)
+                    tblPatients.getModel();
+
+            model.setRowCount(0);
+
+            for (Patient patient : patients) {
+
+                model.addRow(new Object[]{
+
+                    patient.getPatientId(),
+                    patient.getFirstName(),
+                    patient.getLastName(),
+                    patient.getContactNumber(),
+                    patient.getEmail()
+
+                });
+            }
+
+            if (patients.isEmpty()) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No patient found."
+                );
+            }
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Search Error"
             );
         }
 
@@ -365,7 +456,9 @@ public class PatientForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Search Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_btnSearchActionPerformed
@@ -385,18 +478,33 @@ public class PatientForm extends javax.swing.JFrame {
             return;
         }
 
-        int patientId = Integer.parseInt(
-                tblPatients
-                        .getValueAt(row, 0)
-                        .toString()
-        );
+        int patientId =
+                Integer.parseInt(
+                        tblPatients
+                                .getValueAt(row, 0)
+                                .toString()
+                );
 
-        Patient patient =
-                patientDAO.findById(patientId);
+        HttpResponse<String> response =
+                patientApiClient.getPatient(
+                        patientId
+                );
 
-        if (patient == null) {
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Patient Error"
+            );
+
             return;
         }
+
+        Patient patient =
+                objectMapper.readValue(
+                        response.body(),
+                        Patient.class
+                );
 
         txtPatientId.setText(
                 String.valueOf(
@@ -444,7 +552,9 @@ public class PatientForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Patient Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_tblPatientsMouseClicked
@@ -453,7 +563,8 @@ public class PatientForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
-        if (txtPatientId.getText().trim().isEmpty()) {
+        if (txtPatientId.getText()
+                .trim().isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -465,11 +576,12 @@ public class PatientForm extends javax.swing.JFrame {
 
         Patient patient = new Patient();
 
-        patient.setPatientId(
+        int patientId =
                 Integer.parseInt(
-                        txtPatientId.getText()
-                )
-        );
+                        txtPatientId.getText().trim()
+                );
+
+        patient.setPatientId(patientId);
 
         patient.setFirstName(
                 txtFirstName.getText().trim()
@@ -494,7 +606,8 @@ public class PatientForm extends javax.swing.JFrame {
         String dob =
                 txtDateOfBirth.getText().trim();
 
-        if (!dob.isEmpty()) {
+        if (!dob.isEmpty()
+                && !dob.equals("YYYY-MM-DD")) {
 
             patient.setDateOfBirth(
                     java.time.LocalDate.parse(dob)
@@ -502,13 +615,28 @@ public class PatientForm extends javax.swing.JFrame {
         }
 
         patient.setGender(
-                cmbGender.getSelectedItem().toString()
+                cmbGender.getSelectedItem()
+                        .toString()
+                        .trim()
         );
 
-        boolean updated =
-                patientService.update(patient);
+        String json =
+                objectMapper.writeValueAsString(
+                        patient
+                );
+        System.out.println(
+        "UPDATE JSON SENT:"
+);
 
-        if (updated) {
+System.out.println(json);
+
+        HttpResponse<String> response =
+                patientApiClient.updatePatient(
+                        patientId,
+                        json
+                );
+
+        if (response.statusCode() == 200) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -519,11 +647,29 @@ public class PatientForm extends javax.swing.JFrame {
 
         } else {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Patient update failed."
+            showApiError(
+                    response,
+                    "Update Error"
             );
         }
+
+    } catch (java.time.format.DateTimeParseException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Invalid date. Please use YYYY-MM-DD.",
+                "Update Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+
+    } catch (NumberFormatException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Invalid patient ID.",
+                "Update Error",
+                JOptionPane.ERROR_MESSAGE
+        );
 
     } catch (Exception e) {
 
@@ -535,6 +681,11 @@ public class PatientForm extends javax.swing.JFrame {
         );
     }
     }//GEN-LAST:event_btnUpdatePatientActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+       goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
 
     /**
      * @param args the command line arguments
@@ -565,8 +716,24 @@ public class PatientForm extends javax.swing.JFrame {
 
     try {
 
+        HttpResponse<String> response =
+                patientApiClient.searchPatients("");
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Error"
+            );
+
+            return;
+        }
+
         List<Patient> patients =
-                patientDAO.searchByName("");
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Patient>>() {}
+                );
 
         DefaultTableModel model =
                 (DefaultTableModel)
@@ -598,6 +765,25 @@ public class PatientForm extends javax.swing.JFrame {
     }
 }
     
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    String message =
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\n"
+            + "Server Response:\n"
+            + response.body();
+
+    JOptionPane.showMessageDialog(
+            this,
+            message,
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
     private void clearFields() {
 
     txtPatientId.setText("");
@@ -612,8 +798,19 @@ public class PatientForm extends javax.swing.JFrame {
 
     txtFirstName.requestFocus();
 }
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClearPatient;
     private javax.swing.JButton btnSavePatient;
     private javax.swing.JButton btnSearch;

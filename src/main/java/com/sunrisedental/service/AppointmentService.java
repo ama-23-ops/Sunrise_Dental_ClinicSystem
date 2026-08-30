@@ -37,4 +37,27 @@ public class AppointmentService {
     }
     public boolean cancel(int id)throws SQLException{return dao.setStatus(id,"CANCELLED");
     }
+    
+    public Appointment findByNo(
+        String appointmentNo)
+        throws SQLException {
+
+    if (appointmentNo == null ||
+            appointmentNo.trim().isEmpty()) {
+
+        throw new IllegalArgumentException(
+                "Appointment number is required."
+        );
+    }
+
+    return dao.findByNo(
+            appointmentNo.trim()
+    );
+}
+    
+    public java.util.List<Appointment> findAll()
+        throws SQLException {
+
+    return dao.findAll();
+}
 }

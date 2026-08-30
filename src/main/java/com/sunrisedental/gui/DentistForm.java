@@ -4,8 +4,13 @@
  */
 package com.sunrisedental.gui;
 
-import com.sunrisedental.dao.DentistDAO;
+import com.sunrisedental.client.DentistApiClient;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sunrisedental.model.Dentist;
+import com.sunrisedental.model.User;
+
+import java.net.http.HttpResponse;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -15,7 +20,7 @@ import javax.swing.table.DefaultTableModel;
  * @author iffah
  */
 public class DentistForm extends javax.swing.JFrame {
-    
+    private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DentistForm.class.getName());
 
     /**
@@ -23,23 +28,55 @@ public class DentistForm extends javax.swing.JFrame {
      */
     public DentistForm() {
         initComponents();
-        
+    }
+    
+    public DentistForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+
+    
         setLocationRelativeTo(null);
 
         txtDentistId.setEditable(false);
 
         loadDentists();
-    }
+}
     
-    private final DentistDAO dentistDAO =
-        new DentistDAO();
-    
+    private final DentistApiClient dentistApiClient =
+        new DentistApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
     private void loadDentists() {
 
     try {
 
+        HttpResponse<String> response =
+                dentistApiClient.getAllDentists();
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Dentists Error"
+            );
+
+            return;
+        }
+
         List<Dentist> dentists =
-                dentistDAO.findAll();
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Dentist>>() {}
+                );
 
         DefaultTableModel model =
                 (DefaultTableModel)
@@ -56,6 +93,7 @@ public class DentistForm extends javax.swing.JFrame {
                 dentist.getContactNumber(),
                 dentist.getSpecialization(),
                 dentist.isActive()
+
             });
         }
 
@@ -63,7 +101,9 @@ public class DentistForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Load Dentists Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 }
@@ -93,6 +133,7 @@ public class DentistForm extends javax.swing.JFrame {
         btnClearDentist = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblDentists = new javax.swing.JTable();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -134,6 +175,9 @@ public class DentistForm extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(tblDentists);
 
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -169,6 +213,10 @@ public class DentistForm extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnBack)
+                .addGap(51, 51, 51))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -202,7 +250,9 @@ public class DentistForm extends javax.swing.JFrame {
                     .addComponent(btnClearDentist))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(40, Short.MAX_VALUE)
+                .addContainerGap(11, Short.MAX_VALUE)
+                .addComponent(btnBack)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -214,92 +264,152 @@ public class DentistForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
-        Dentist dentist =
-                new Dentist();
+        Dentist dentist = new Dentist();
 
         dentist.setDentistName(
-                txtDentistName.getText()
-                        .trim()
+                txtDentistName.getText().trim()
         );
 
         dentist.setContactNumber(
-                txtDentistContact.getText()
-                        .trim()
+                txtDentistContact.getText().trim()
         );
 
         dentist.setSpecialization(
-                txtSpecialization.getText()
-                        .trim()
+                txtSpecialization.getText().trim()
         );
 
         dentist.setActive(
                 chkActive.isSelected()
         );
 
-        int id =
-                dentistDAO.create(dentist);
+        String json =
+                objectMapper.writeValueAsString(
+                        dentist
+                );
 
-        txtDentistId.setText(
-                String.valueOf(id)
+        System.out.println(
+                "CREATE DENTIST JSON:"
         );
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Dentist saved successfully."
-        );
+        System.out.println(json);
 
-        loadDentists();
+        HttpResponse<String> response =
+                dentistApiClient.createDentist(
+                        json
+                );
+
+        if (response.statusCode() == 201) {
+
+            Dentist createdDentist =
+                    objectMapper.readValue(
+                            response.body(),
+                            Dentist.class
+                    );
+
+            txtDentistId.setText(
+                    String.valueOf(
+                            createdDentist.getDentistId()
+                    )
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Dentist saved successfully.\n"
+                    + "Dentist ID: "
+                    + createdDentist.getDentistId()
+            );
+
+            loadDentists();
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Save Dentist Error"
+            );
+        }
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Save Dentist Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_btnSaveDentistActionPerformed
 
     private void tblDentistsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblDentistsMouseClicked
         // TODO add your handling code here:
+        try {
+
         int row =
-            tblDentists.getSelectedRow();
-        
+                tblDentists.getSelectedRow();
 
-    if (row == -1) {
-        return;
+        if (row == -1) {
+            return;
+        }
+
+        int dentistId =
+                Integer.parseInt(
+                        tblDentists
+                                .getValueAt(row, 0)
+                                .toString()
+                );
+
+        HttpResponse<String> response =
+                dentistApiClient.getDentist(
+                        dentistId
+                );
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Dentist Error"
+            );
+
+            return;
+        }
+
+        Dentist dentist =
+                objectMapper.readValue(
+                        response.body(),
+                        Dentist.class
+                );
+
+        txtDentistId.setText(
+                String.valueOf(
+                        dentist.getDentistId()
+                )
+        );
+
+        txtDentistName.setText(
+                dentist.getDentistName()
+        );
+
+        txtDentistContact.setText(
+                dentist.getContactNumber()
+        );
+
+        txtSpecialization.setText(
+                dentist.getSpecialization()
+        );
+
+        chkActive.setSelected(
+                dentist.isActive()
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                "Dentist Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
-
-    txtDentistId.setText(
-            tblDentists.getValueAt(
-                    row, 0
-            ).toString()
-    );
-
-    txtDentistName.setText(
-            tblDentists.getValueAt(
-                    row, 1
-            ).toString()
-    );
-
-    txtDentistContact.setText(
-            tblDentists.getValueAt(
-                    row, 2
-            ).toString()
-    );
-
-    txtSpecialization.setText(
-            tblDentists.getValueAt(
-                    row, 3
-            ).toString()
-    );
-
-    chkActive.setSelected(
-            Boolean.parseBoolean(
-                    tblDentists.getValueAt(
-                            row, 4
-                    ).toString()
-            )
-    );
     }//GEN-LAST:event_tblDentistsMouseClicked
 
     private void btnUpdateDentistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateDentistActionPerformed
@@ -307,60 +417,128 @@ public class DentistForm extends javax.swing.JFrame {
         try {
 
         if (txtDentistId.getText()
-                .trim()
-                .isEmpty()) {
+                .trim().isEmpty()) {
 
-            throw new IllegalArgumentException(
+            JOptionPane.showMessageDialog(
+                    this,
                     "Please select a dentist first."
             );
+
+            return;
         }
 
-        Dentist dentist =
-                new Dentist();
-
-        dentist.setDentistId(
+        int dentistId =
                 Integer.parseInt(
-                        txtDentistId.getText()
-                )
-        );
+                        txtDentistId.getText().trim()
+                );
+
+        Dentist dentist = new Dentist();
+
+        dentist.setDentistId(dentistId);
 
         dentist.setDentistName(
-                txtDentistName.getText()
-                        .trim()
+                txtDentistName.getText().trim()
         );
 
         dentist.setContactNumber(
-                txtDentistContact.getText()
-                        .trim()
+                txtDentistContact.getText().trim()
         );
 
         dentist.setSpecialization(
-                txtSpecialization.getText()
-                        .trim()
+                txtSpecialization.getText().trim()
         );
 
         dentist.setActive(
                 chkActive.isSelected()
         );
 
-        dentistDAO.update(dentist);
+        String json =
+                objectMapper.writeValueAsString(
+                        dentist
+                );
+
+        System.out.println(
+                "UPDATE DENTIST JSON:"
+        );
+
+        System.out.println(json);
+
+        HttpResponse<String> response =
+                dentistApiClient.updateDentist(
+                        dentistId,
+                        json
+                );
+
+        if (response.statusCode() == 200) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Dentist updated successfully."
+            );
+
+            loadDentists();
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Update Dentist Error"
+            );
+        }
+
+    } catch (NumberFormatException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Dentist updated successfully."
+                "Invalid dentist ID.",
+                "Update Dentist Error",
+                JOptionPane.ERROR_MESSAGE
         );
-
-        loadDentists();
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Update Dentist Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_btnUpdateDentistActionPerformed
 
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+         goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    String message =
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\n"
+            + "Server Response:\n"
+            + response.body();
+
+    JOptionPane.showMessageDialog(
+            this,
+            message,
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
     /**
      * @param args the command line arguments
      */
@@ -387,6 +565,7 @@ public class DentistForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClearDentist;
     private javax.swing.JButton btnSaveDentist;
     private javax.swing.JButton btnUpdateDentist;

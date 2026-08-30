@@ -1,11 +1,17 @@
+package com.sunrisedental.gui;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package com.sunrisedental.gui;
-import com.sunrisedental.report.ReportDAO;
+import com.sunrisedental.client.ReportApiClient;
 import com.sunrisedental.report.AppointmentDetails;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sunrisedental.model.User;
+
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
  * @author iffah
  */
 public class ReportsForm extends javax.swing.JFrame {
-    
+    private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ReportsForm.class.getName());
 
     /**
@@ -26,9 +32,24 @@ public class ReportsForm extends javax.swing.JFrame {
     public ReportsForm() {
         initComponents();
     }
+    public ReportsForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+}
     
-    private final ReportDAO reportDAO =
-        new ReportDAO();
+    private final ReportApiClient reportApiClient =
+        new ReportApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -46,6 +67,7 @@ public class ReportsForm extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tblReport = new javax.swing.JTable();
         btnClearReport = new javax.swing.JButton();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -75,12 +97,18 @@ public class ReportsForm extends javax.swing.JFrame {
         btnClearReport.setText("CLEAR");
         btnClearReport.addActionListener(this::btnClearReportActionPerformed);
 
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(61, 61, 61)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(69, 69, 69)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -90,19 +118,23 @@ public class ReportsForm extends javax.swing.JFrame {
                                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(61, 61, 61)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnClearReport)))
-                .addContainerGap(51, Short.MAX_VALUE))
+                                .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnBack)
+                    .addComponent(btnClearReport))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(42, 42, 42)
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(42, 42, 42)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(btnBack)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -127,22 +159,79 @@ public class ReportsForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
+        String dateText =
+                txtReportDate
+                        .getText()
+                        .trim();
+
+        if (dateText.isEmpty() ||
+                dateText.equalsIgnoreCase("YYYY-MM-DD")) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please enter a report date.",
+                    "Report Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        // Validate date locally first.
+
         LocalDate reportDate =
-                LocalDate.parse(
-                        txtReportDate.getText()
-                                .trim()
-                );
+                LocalDate.parse(dateText);
+
+
+        // ==========================================
+        // CALL REST API
+        // ==========================================
+
+        HttpResponse<String> response =
+                reportApiClient
+                        .getDailyAppointments(
+                                reportDate.toString()
+                        );
+
+
+        // ==========================================
+        // CHECK RESPONSE
+        // ==========================================
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Report Error"
+            );
+
+            return;
+        }
+
+
+        // ==========================================
+        // CONVERT JSON TO OBJECTS
+        // ==========================================
 
         List<AppointmentDetails> appointments =
-                reportDAO.dailyAppointments(
-                        reportDate
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<
+                                List<AppointmentDetails>
+                        >() {}
                 );
+
+
+        // ==========================================
+        // UPDATE TABLE
+        // ==========================================
 
         DefaultTableModel model =
                 (DefaultTableModel)
                 tblReport.getModel();
 
         model.setRowCount(0);
+
 
         for (AppointmentDetails appointment
                 : appointments) {
@@ -160,21 +249,37 @@ public class ReportsForm extends javax.swing.JFrame {
             });
         }
 
+
+        // ==========================================
+        // NO RESULTS
+        // ==========================================
+
         if (appointments.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
                     "No appointments found for "
-                    + reportDate
+                    + reportDate,
+                    "Daily Report",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         }
+
+    } catch (
+            java.time.format.DateTimeParseException e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter date as YYYY-MM-DD.",
+                "Report Error",
+                JOptionPane.ERROR_MESSAGE
+        );
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Please enter date as YYYY-MM-DD.\n"
-                + e.getMessage(),
+                e.getMessage(),
                 "Report Error",
                 JOptionPane.ERROR_MESSAGE
         );
@@ -196,6 +301,35 @@ public class ReportsForm extends javax.swing.JFrame {
     model.setRowCount(0);
     }//GEN-LAST:event_btnClearReportActionPerformed
 
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+         goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    JOptionPane.showMessageDialog(
+            this,
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\nServer Response:\n"
+            + response.body(),
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
     /**
      * @param args the command line arguments
      */
@@ -222,6 +356,7 @@ public class ReportsForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClearReport;
     private javax.swing.JButton btnGenerateDailyReport;
     private javax.swing.JLabel jLabel1;

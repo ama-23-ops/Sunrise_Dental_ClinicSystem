@@ -36,4 +36,21 @@ public class BillingService {
     }
     public BigDecimal calculateTotal(BigDecimal consultation,BigDecimal treatment){return consultation.add(treatment).setScale(2,RoundingMode.HALF_UP);
     }
+    
+    public Bill findByAppointmentId(
+        int appointmentId)
+        throws SQLException {
+
+    if (appointmentId <= 0) {
+
+        throw new IllegalArgumentException(
+                "Invalid appointment ID."
+        );
+    }
+
+    return billDAO.findByAppointmentId(
+            appointmentId
+    );
+}
+    
 }

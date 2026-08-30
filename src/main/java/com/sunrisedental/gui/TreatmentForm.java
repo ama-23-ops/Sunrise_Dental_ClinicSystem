@@ -4,9 +4,16 @@
  */
 package com.sunrisedental.gui;
 
-import com.sunrisedental.dao.TreatmentDAO;
+import com.sunrisedental.client.TreatmentApiClient;
 import com.sunrisedental.model.Treatment;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sunrisedental.model.User;
+
+import java.net.http.HttpResponse;
 import java.util.List;
+
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -15,7 +22,7 @@ import javax.swing.table.DefaultTableModel;
  * @author iffah
  */
 public class TreatmentForm extends javax.swing.JFrame {
-    
+    private User currentUser;
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TreatmentForm.class.getName());
 
     /**
@@ -23,23 +30,55 @@ public class TreatmentForm extends javax.swing.JFrame {
      */
     public TreatmentForm() {
         initComponents();
-        
-        setLocationRelativeTo(null);
+    }
+    
+    public TreatmentForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+
+    setLocationRelativeTo(null);
 
         txtTreatmentId.setEditable(false);
 
         loadTreatments();
-    }
+}
     
-    private final TreatmentDAO treatmentDAO =
-        new TreatmentDAO();
+    private final TreatmentApiClient treatmentApiClient =
+        new TreatmentApiClient();
+
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
     
     private void loadTreatments() {
 
     try {
 
+        HttpResponse<String> response =
+                treatmentApiClient.getAllTreatments();
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Treatments Error"
+            );
+
+            return;
+        }
+
         List<Treatment> treatments =
-                treatmentDAO.findAll();
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Treatment>>() {}
+                );
 
         DefaultTableModel model =
                 (DefaultTableModel)
@@ -56,6 +95,7 @@ public class TreatmentForm extends javax.swing.JFrame {
                 treatment.getTreatmentCost(),
                 treatment.getDescription(),
                 treatment.isActive()
+
             });
         }
 
@@ -63,11 +103,12 @@ public class TreatmentForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Load Treatments Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -94,6 +135,7 @@ public class TreatmentForm extends javax.swing.JFrame {
         txtTreatmentDescription = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblTreatments = new javax.swing.JTable();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -116,6 +158,7 @@ public class TreatmentForm extends javax.swing.JFrame {
         jButton2.addActionListener(this::jButton2ActionPerformed);
 
         jButton3.setText("CLEAR");
+        jButton3.addActionListener(this::jButton3ActionPerformed);
 
         txtTreatmentDescription.setColumns(20);
         txtTreatmentDescription.setRows(5);
@@ -138,6 +181,9 @@ public class TreatmentForm extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(tblTreatments);
+
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -182,11 +228,17 @@ public class TreatmentForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(14, 14, 14))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnBack)
+                .addGap(131, 131, 131))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(44, 44, 44)
+                .addGap(15, 15, 15)
+                .addComponent(btnBack)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -231,23 +283,40 @@ public class TreatmentForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
+        String name =
+                txtTreatmentName.getText().trim();
+
+        String costText =
+                txtTreatmentCost.getText().trim();
+
+        if (name.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Treatment name is required."
+            );
+        }
+
+        if (costText.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Treatment cost is required."
+            );
+        }
+
         Treatment treatment =
                 new Treatment();
 
-        treatment.setTreatmentName(
-                txtTreatmentName.getText()
-                        .trim()
-        );
+        treatment.setTreatmentName(name);
 
         treatment.setTreatmentCost(
                 new java.math.BigDecimal(
-                        txtTreatmentCost.getText()
-                                .trim()
+                        costText
                 )
         );
 
         treatment.setDescription(
-                txtTreatmentDescription.getText()
+                txtTreatmentDescription
+                        .getText()
                         .trim()
         );
 
@@ -255,69 +324,147 @@ public class TreatmentForm extends javax.swing.JFrame {
                 chkTreatmentActive.isSelected()
         );
 
-        int id =
-                treatmentDAO.create(treatment);
+        String json =
+                objectMapper.writeValueAsString(
+                        treatment
+                );
 
-        txtTreatmentId.setText(
-                String.valueOf(id)
+        System.out.println(
+                "CREATE TREATMENT JSON:"
         );
+
+        System.out.println(json);
+
+        HttpResponse<String> response =
+                treatmentApiClient.createTreatment(
+                        json
+                );
+
+        if (response.statusCode() == 201) {
+
+            Treatment createdTreatment =
+                    objectMapper.readValue(
+                            response.body(),
+                            Treatment.class
+                    );
+
+            txtTreatmentId.setText(
+                    String.valueOf(
+                            createdTreatment
+                                    .getTreatmentId()
+                    )
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Treatment saved successfully.\n"
+                    + "Treatment ID: "
+                    + createdTreatment.getTreatmentId()
+            );
+
+            loadTreatments();
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Save Treatment Error"
+            );
+        }
+
+    } catch (NumberFormatException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Treatment saved successfully."
+                "Treatment cost must be a valid number.",
+                "Save Treatment Error",
+                JOptionPane.ERROR_MESSAGE
         );
-
-        loadTreatments();
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Save Treatment Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_btnSaveTreatmentActionPerformed
 
     private void tblTreatmentsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTreatmentsMouseClicked
         // TODO add your handling code here:
+        try {
+
         int row =
-            tblTreatments.getSelectedRow();
+                tblTreatments.getSelectedRow();
 
-    if (row == -1) {
-        return;
+        if (row == -1) {
+            return;
+        }
+
+        int treatmentId =
+                Integer.parseInt(
+                        tblTreatments
+                                .getValueAt(row, 0)
+                                .toString()
+                );
+
+        HttpResponse<String> response =
+                treatmentApiClient.getTreatment(
+                        treatmentId
+                );
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Treatment Error"
+            );
+
+            return;
+        }
+
+        Treatment treatment =
+                objectMapper.readValue(
+                        response.body(),
+                        Treatment.class
+                );
+
+        txtTreatmentId.setText(
+                String.valueOf(
+                        treatment.getTreatmentId()
+                )
+        );
+
+        txtTreatmentName.setText(
+                treatment.getTreatmentName()
+        );
+
+        txtTreatmentCost.setText(
+                treatment.getTreatmentCost()
+                        .toPlainString()
+        );
+
+        txtTreatmentDescription.setText(
+                treatment.getDescription() == null
+                        ? ""
+                        : treatment.getDescription()
+        );
+
+        chkTreatmentActive.setSelected(
+                treatment.isActive()
+        );
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                "Treatment Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
-
-    txtTreatmentId.setText(
-            tblTreatments.getValueAt(
-                    row, 0
-            ).toString()
-    );
-
-    txtTreatmentName.setText(
-            tblTreatments.getValueAt(
-                    row, 1
-            ).toString()
-    );
-
-    txtTreatmentCost.setText(
-            tblTreatments.getValueAt(
-                    row, 2
-            ).toString()
-    );
-
-    txtTreatmentDescription.setText(
-            tblTreatments.getValueAt(
-                    row, 3
-            ).toString()
-    );
-
-    chkTreatmentActive.setSelected(
-            Boolean.parseBoolean(
-                    tblTreatments.getValueAt(
-                            row, 4
-                    ).toString()
-            )
-    );
     }//GEN-LAST:event_tblTreatmentsMouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -333,29 +480,50 @@ public class TreatmentForm extends javax.swing.JFrame {
             );
         }
 
+        String name =
+                txtTreatmentName.getText().trim();
+
+        String costText =
+                txtTreatmentCost.getText().trim();
+
+        if (name.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Treatment name is required."
+            );
+        }
+
+        if (costText.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Treatment cost is required."
+            );
+        }
+
+        int treatmentId =
+                Integer.parseInt(
+                        txtTreatmentId.getText()
+                                .trim()
+                );
+
         Treatment treatment =
                 new Treatment();
 
         treatment.setTreatmentId(
-                Integer.parseInt(
-                        txtTreatmentId.getText()
-                )
+                treatmentId
         );
 
-        treatment.setTreatmentName(
-                txtTreatmentName.getText()
-                        .trim()
-        );
+        treatment.setTreatmentName(name);
 
         treatment.setTreatmentCost(
                 new java.math.BigDecimal(
-                        txtTreatmentCost.getText()
-                                .trim()
+                        costText
                 )
         );
 
         treatment.setDescription(
-                txtTreatmentDescription.getText()
+                txtTreatmentDescription
+                        .getText()
                         .trim()
         );
 
@@ -363,24 +531,104 @@ public class TreatmentForm extends javax.swing.JFrame {
                 chkTreatmentActive.isSelected()
         );
 
-        treatmentDAO.update(treatment);
+        String json =
+                objectMapper.writeValueAsString(
+                        treatment
+                );
+
+        System.out.println(
+                "UPDATE TREATMENT JSON:"
+        );
+
+        System.out.println(json);
+
+        HttpResponse<String> response =
+                treatmentApiClient.updateTreatment(
+                        treatmentId,
+                        json
+                );
+
+        if (response.statusCode() == 200) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Treatment updated successfully."
+            );
+
+            loadTreatments();
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Update Treatment Error"
+            );
+        }
+
+    } catch (NumberFormatException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Treatment updated successfully."
+                "Treatment ID or cost is invalid.",
+                "Update Treatment Error",
+                JOptionPane.ERROR_MESSAGE
         );
-
-        loadTreatments();
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Update Treatment Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    txtTreatmentId.setText("");
+    txtTreatmentName.setText("");
+    txtTreatmentCost.setText("");
+    txtTreatmentDescription.setText("");
+    chkTreatmentActive.setSelected(true);
+
+    tblTreatments.clearSelection();
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+         goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    String message =
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\n"
+            + "Server Response:\n"
+            + response.body();
+
+    JOptionPane.showMessageDialog(
+            this,
+            message,
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
     /**
      * @param args the command line arguments
      */
@@ -407,6 +655,7 @@ public class TreatmentForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnSaveTreatment;
     private javax.swing.JCheckBox chkTreatmentActive;
     private javax.swing.JButton jButton2;

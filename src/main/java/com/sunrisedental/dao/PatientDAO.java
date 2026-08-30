@@ -61,4 +61,24 @@ public class PatientDAO {
         p.setGender(r.getString("gender"));
       return p;
     }
+    
+    public int countPatients() throws SQLException {
+
+    String sql =
+            "SELECT COUNT(*) FROM patients";
+
+    try (Connection connection =
+            DBConnection.getConnection();
+         PreparedStatement statement =
+            connection.prepareStatement(sql);
+         ResultSet resultSet =
+            statement.executeQuery()) {
+
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        }
+    }
+
+    return 0;
+}
 }

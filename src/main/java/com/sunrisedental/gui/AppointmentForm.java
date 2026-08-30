@@ -4,18 +4,21 @@
  */
 package com.sunrisedental.gui;
 
-import com.sunrisedental.dao.AppointmentDAO;
-import com.sunrisedental.dao.DentistDAO;
-import com.sunrisedental.dao.PatientDAO;
-import com.sunrisedental.dao.TreatmentDAO;
+import com.sunrisedental.client.AppointmentApiClient;
+import com.sunrisedental.client.DentistApiClient;
+import com.sunrisedental.client.PatientApiClient;
+import com.sunrisedental.client.TreatmentApiClient;
 
 import com.sunrisedental.model.Appointment;
 import com.sunrisedental.model.Dentist;
 import com.sunrisedental.model.Patient;
 import com.sunrisedental.model.Treatment;
 
-import com.sunrisedental.service.AppointmentService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sunrisedental.model.User;
 
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,13 +31,20 @@ import javax.swing.table.DefaultTableModel;
  * @author iffah
  */
 public class AppointmentForm extends javax.swing.JFrame {
-    
+    private User currentUser;
     /**
      * Creates new form AppointmentForm
      */
     public AppointmentForm() {
         initComponents();
- 
+}
+    
+    public AppointmentForm(User currentUser) {
+
+    initComponents();
+
+    this.currentUser = currentUser;
+
     setLocationRelativeTo(null);
 
     txtAppointmentNo.setEditable(false);
@@ -51,28 +61,50 @@ public class AppointmentForm extends javax.swing.JFrame {
     cmbStatus.addItem("CANCELLED");
 }
     
-    private final AppointmentDAO appointmentDAO =
-        new AppointmentDAO();
+    private final AppointmentApiClient appointmentApiClient =
+        new AppointmentApiClient();
 
-    private final AppointmentService appointmentService =
-        new AppointmentService();
+private final PatientApiClient patientApiClient =
+        new PatientApiClient();
 
-    private final PatientDAO patientDAO =
-        new PatientDAO();
+private final DentistApiClient dentistApiClient =
+        new DentistApiClient();
 
-    private final DentistDAO dentistDAO =
-        new DentistDAO();
+private final TreatmentApiClient treatmentApiClient =
+        new TreatmentApiClient();
 
-    private final TreatmentDAO treatmentDAO =
-        new TreatmentDAO();
+private final ObjectMapper objectMapper =
+        new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(
+                        com.fasterxml.jackson.databind.DeserializationFeature
+                                .FAIL_ON_UNKNOWN_PROPERTIES,
+                        false
+                );
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AppointmentForm.class.getName());
     
     private void loadPatients() {
 
     try {
 
+        HttpResponse<String> response =
+                patientApiClient.searchPatients("");
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Patients Error"
+            );
+
+            return;
+        }
+
         List<Patient> patients =
-                patientDAO.searchByName("");
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Patient>>() {}
+                );
 
         cmbPatient.removeAllItems();
 
@@ -91,7 +123,9 @@ public class AppointmentForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Load Patients Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 }
@@ -100,8 +134,24 @@ public class AppointmentForm extends javax.swing.JFrame {
 
     try {
 
+        HttpResponse<String> response =
+                dentistApiClient.getActiveDentists();
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Dentists Error"
+            );
+
+            return;
+        }
+
         List<Dentist> dentists =
-                dentistDAO.findActive();
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Dentist>>() {}
+                );
 
         cmbDentist.removeAllItems();
 
@@ -118,7 +168,9 @@ public class AppointmentForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Load Dentists Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 }
@@ -127,8 +179,24 @@ public class AppointmentForm extends javax.swing.JFrame {
 
     try {
 
+        HttpResponse<String> response =
+                treatmentApiClient.getActiveTreatments();
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Treatments Error"
+            );
+
+            return;
+        }
+
         List<Treatment> treatments =
-                treatmentDAO.findActive();
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Treatment>>() {}
+                );
 
         cmbTreatment.removeAllItems();
 
@@ -145,7 +213,68 @@ public class AppointmentForm extends javax.swing.JFrame {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Load Treatments Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+   
+   private void loadAppointments() {
+
+    try {
+
+        HttpResponse<String> response =
+                appointmentApiClient
+                        .getAllAppointments();
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Load Appointments Error"
+            );
+
+            return;
+        }
+
+        List<Appointment> appointments =
+                objectMapper.readValue(
+                        response.body(),
+                        new TypeReference<List<Appointment>>() {}
+                );
+
+        DefaultTableModel model =
+                (DefaultTableModel)
+                tblAppointments.getModel();
+
+        model.setRowCount(0);
+
+        for (Appointment appointment :
+                appointments) {
+
+            model.addRow(new Object[]{
+
+                appointment.getAppointmentId(),
+                appointment.getAppointmentNo(),
+                appointment.getPatientId(),
+                appointment.getDentistId(),
+                appointment.getTreatmentId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                appointment.getStatus(),
+                appointment.getNotes()
+
+            });
+        }
+
+    } catch (Exception e) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                "Load Appointments Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 }
@@ -207,47 +336,6 @@ public class AppointmentForm extends javax.swing.JFrame {
     return Integer.parseInt(idText);
 }
    
-   private void loadAppointments() {
-
-    try {
-
-        List<Appointment> appointments =
-                appointmentDAO.findAll();
-
-        DefaultTableModel model =
-                (DefaultTableModel) tblAppointments.getModel();
-
-        model.setRowCount(0);
-
-        for (Appointment appointment : appointments) {
-
-            model.addRow(new Object[]{
-
-                appointment.getAppointmentId(),
-                appointment.getAppointmentNo(),
-                appointment.getPatientId(),
-                appointment.getDentistId(),
-                appointment.getTreatmentId(),
-                appointment.getAppointmentDate(),
-                appointment.getAppointmentTime(),
-                appointment.getStatus(),
-                appointment.getNotes()
-
-            });
-        }
-
-    } catch (Exception e) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error loading appointments: "
-                + e.getMessage(),
-                "Database Error",
-                JOptionPane.ERROR_MESSAGE
-        );
-    }
-}
-   
    private void selectAppointmentRow(
         String appointmentNo) {
 
@@ -307,6 +395,7 @@ public class AppointmentForm extends javax.swing.JFrame {
         tblAppointments = new javax.swing.JTable();
         btnSearchAppointment = new javax.swing.JButton();
         txtSearchAppointmentNo = new javax.swing.JTextField();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -381,6 +470,9 @@ public class AppointmentForm extends javax.swing.JFrame {
         btnSearchAppointment.setText("SEARCH");
         btnSearchAppointment.addActionListener(this::btnSearchAppointmentActionPerformed);
 
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -430,11 +522,17 @@ public class AppointmentForm extends javax.swing.JFrame {
                 .addGap(228, 228, 228)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(597, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnBack)
+                .addGap(51, 51, 51))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(52, 52, 52)
+                .addGap(20, 20, 20)
+                .addComponent(btnBack)
+                .addGap(9, 9, 9)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
@@ -492,97 +590,150 @@ public class AppointmentForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
-        // Validate selections
         if (cmbPatient.getSelectedItem() == null) {
+
             throw new IllegalArgumentException(
                     "Please select a patient."
             );
         }
 
         if (cmbDentist.getSelectedItem() == null) {
+
             throw new IllegalArgumentException(
                     "Please select a dentist."
             );
         }
 
         if (cmbTreatment.getSelectedItem() == null) {
+
             throw new IllegalArgumentException(
                     "Please select a treatment."
             );
         }
 
-        if (txtAppointmentDate.getText().trim().isEmpty()) {
+        String dateText =
+                txtAppointmentDate.getText().trim();
+
+        String timeText =
+                txtAppointmentTime.getText().trim();
+
+        if (dateText.isEmpty() ||
+                dateText.equals("YYYY-MM-DD")) {
+
             throw new IllegalArgumentException(
                     "Please enter the appointment date."
             );
         }
 
-        if (txtAppointmentTime.getText().trim().isEmpty()) {
+        if (timeText.isEmpty() ||
+                timeText.equals("HH:MM")) {
+
             throw new IllegalArgumentException(
                     "Please enter the appointment time."
             );
         }
 
-        // Get IDs from ComboBoxes
-        int patientId = getSelectedId(cmbPatient);
-        int dentistId = getSelectedId(cmbDentist);
-        int treatmentId = getSelectedId(cmbTreatment);
+        int patientId =
+                getSelectedId(cmbPatient);
 
-        // Create appointment object
-        Appointment appointment = new Appointment();
+        int dentistId =
+                getSelectedId(cmbDentist);
+
+        int treatmentId =
+                getSelectedId(cmbTreatment);
+
+        Appointment appointment =
+                new Appointment();
 
         appointment.setPatientId(patientId);
+
         appointment.setDentistId(dentistId);
+
         appointment.setTreatmentId(treatmentId);
 
         appointment.setAppointmentDate(
-                LocalDate.parse(
-                        txtAppointmentDate.getText().trim()
-                )
+                LocalDate.parse(dateText)
         );
 
         appointment.setAppointmentTime(
-                LocalTime.parse(
-                        txtAppointmentTime.getText().trim()
-                )
+                LocalTime.parse(timeText)
         );
 
         appointment.setStatus(
-                cmbStatus.getSelectedItem().toString()
+                cmbStatus.getSelectedItem()
+                        .toString()
         );
 
         appointment.setNotes(
                 txtNotes.getText().trim()
         );
 
-        // Save to database
-        appointmentService.create(appointment);
+        String json =
+                objectMapper.writeValueAsString(
+                        appointment
+                );
 
-        // Display generated appointment number
-        txtAppointmentNo.setText(
-                appointment.getAppointmentNo()
+        System.out.println(
+                "CREATE APPOINTMENT JSON:"
         );
 
-        // Refresh table
-        loadAppointments();
+        System.out.println(json);
 
-        // Select saved appointment in table
-        selectAppointmentRow(
-                appointment.getAppointmentNo()
-        );
+        HttpResponse<String> response =
+                appointmentApiClient
+                        .createAppointment(json);
+
+        if (response.statusCode() == 201) {
+
+            Appointment createdAppointment =
+                    objectMapper.readValue(
+                            response.body(),
+                            Appointment.class
+                    );
+
+            txtAppointmentNo.setText(
+                    createdAppointment
+                            .getAppointmentNo()
+            );
+
+            loadAppointments();
+
+            selectAppointmentRow(
+                    createdAppointment
+                            .getAppointmentNo()
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Appointment saved successfully.\n"
+                    + "Appointment Number: "
+                    + createdAppointment
+                            .getAppointmentNo()
+            );
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Appointment Error"
+            );
+        }
+
+    } catch (java.time.format.DateTimeParseException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Appointment saved successfully.\n"
-                + "Appointment Number: "
-                + appointment.getAppointmentNo()
+                "Please enter the date as YYYY-MM-DD "
+                + "and time as HH:MM or HH:MM:SS.",
+                "Appointment Error",
+                JOptionPane.ERROR_MESSAGE
         );
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Error: " + e.getMessage(),
+                e.getMessage(),
                 "Appointment Error",
                 JOptionPane.ERROR_MESSAGE
         );
@@ -594,7 +745,9 @@ public class AppointmentForm extends javax.swing.JFrame {
         try {
 
         String appointmentNo =
-                txtAppointmentNo.getText().trim();
+                txtAppointmentNo
+                        .getText()
+                        .trim();
 
         if (appointmentNo.isEmpty()) {
 
@@ -606,49 +759,78 @@ public class AppointmentForm extends javax.swing.JFrame {
             return;
         }
 
-        int choice = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to cancel appointment "
-                + appointmentNo + "?",
-                "Confirm Cancellation",
-                JOptionPane.YES_NO_OPTION
-        );
+        int choice =
+                JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to cancel appointment "
+                        + appointmentNo + "?",
+                        "Confirm Cancellation",
+                        JOptionPane.YES_NO_OPTION
+                );
 
         if (choice != JOptionPane.YES_OPTION) {
             return;
         }
 
-        Appointment appointment =
-                appointmentDAO.findByNo(appointmentNo);
+        // Find appointment through REST.
 
-        if (appointment == null) {
+        HttpResponse<String> searchResponse =
+                appointmentApiClient
+                        .searchAppointment(
+                                appointmentNo
+                        );
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Appointment not found."
+        if (searchResponse.statusCode() != 200) {
+
+            showApiError(
+                    searchResponse,
+                    "Cancel Error"
             );
 
             return;
         }
 
-        appointmentService.cancel(
-                appointment.getAppointmentId()
-        );
+        Appointment appointment =
+                objectMapper.readValue(
+                        searchResponse.body(),
+                        Appointment.class
+                );
 
-        cmbStatus.setSelectedItem("CANCELLED");
+        // Cancel through REST.
 
-        loadAppointments();
+        HttpResponse<String> response =
+                appointmentApiClient
+                        .cancelAppointment(
+                                appointment
+                                        .getAppointmentId()
+                        );
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Appointment cancelled successfully."
-        );
+        if (response.statusCode() == 200) {
+
+            cmbStatus.setSelectedItem(
+                    "CANCELLED"
+            );
+
+            loadAppointments();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Appointment cancelled successfully."
+            );
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Cancel Error"
+            );
+        }
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Error: " + e.getMessage(),
+                e.getMessage(),
                 "Cancel Error",
                 JOptionPane.ERROR_MESSAGE
         );
@@ -663,103 +845,170 @@ public class AppointmentForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         try {
 
-        // Update requires an already saved appointment
         String appointmentNo =
-                txtAppointmentNo.getText().trim();
+                txtAppointmentNo
+                        .getText()
+                        .trim();
 
         if (appointmentNo.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Please search for and select an appointment first."
+                    "Please search for and select an appointment first.",
+                    "Update Appointment",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        // Get the appointment from database
+        if (cmbPatient.getSelectedItem() == null ||
+                cmbDentist.getSelectedItem() == null ||
+                cmbTreatment.getSelectedItem() == null) {
+
+            throw new IllegalArgumentException(
+                    "Please select patient, dentist and treatment."
+            );
+        }
+
+        String dateText =
+                txtAppointmentDate
+                        .getText()
+                        .trim();
+
+        String timeText =
+                txtAppointmentTime
+                        .getText()
+                        .trim();
+
+        if (dateText.isEmpty() ||
+                dateText.equals("YYYY-MM-DD")) {
+
+            throw new IllegalArgumentException(
+                    "Please enter the appointment date."
+            );
+        }
+
+        if (timeText.isEmpty() ||
+                timeText.equals("HH:MM")) {
+
+            throw new IllegalArgumentException(
+                    "Please enter the appointment time."
+            );
+        }
+
+        // First retrieve the existing appointment
+        // through REST.
+
+        HttpResponse<String> searchResponse =
+                appointmentApiClient
+                        .searchAppointment(
+                                appointmentNo
+                        );
+
+        if (searchResponse.statusCode() != 200) {
+
+            showApiError(
+                    searchResponse,
+                    "Update Appointment Error"
+            );
+
+            return;
+        }
+
         Appointment appointment =
-                appointmentDAO.findByNo(appointmentNo);
+                objectMapper.readValue(
+                        searchResponse.body(),
+                        Appointment.class
+                );
 
-        if (appointment == null) {
+        // Update values from the form.
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Appointment not found."
-            );
+        appointment.setPatientId(
+                getSelectedId(cmbPatient)
+        );
 
-            return;
-        }
+        appointment.setDentistId(
+                getSelectedId(cmbDentist)
+        );
 
-        // Validate ComboBox selections
-        if (cmbPatient.getSelectedItem() == null) {
-            throw new IllegalArgumentException(
-                    "Please select a patient."
-            );
-        }
-
-        if (cmbDentist.getSelectedItem() == null) {
-            throw new IllegalArgumentException(
-                    "Please select a dentist."
-            );
-        }
-
-        if (cmbTreatment.getSelectedItem() == null) {
-            throw new IllegalArgumentException(
-                    "Please select a treatment."
-            );
-        }
-
-        // Get IDs from ComboBoxes
-        int patientId = getSelectedId(cmbPatient);
-        int dentistId = getSelectedId(cmbDentist);
-        int treatmentId = getSelectedId(cmbTreatment);
-
-        // Update appointment object
-        appointment.setPatientId(patientId);
-        appointment.setDentistId(dentistId);
-        appointment.setTreatmentId(treatmentId);
+        appointment.setTreatmentId(
+                getSelectedId(cmbTreatment)
+        );
 
         appointment.setAppointmentDate(
-                LocalDate.parse(
-                        txtAppointmentDate.getText().trim()
-                )
+                LocalDate.parse(dateText)
         );
 
         appointment.setAppointmentTime(
-                LocalTime.parse(
-                        txtAppointmentTime.getText().trim()
-                )
+                LocalTime.parse(timeText)
         );
 
         appointment.setStatus(
-                cmbStatus.getSelectedItem().toString()
+                cmbStatus.getSelectedItem()
+                        .toString()
         );
 
         appointment.setNotes(
                 txtNotes.getText().trim()
         );
 
-        // Update database
-        appointmentService.update(appointment);
+        String json =
+                objectMapper.writeValueAsString(
+                        appointment
+                );
 
-        // Refresh table
-        loadAppointments();
+        System.out.println(
+                "UPDATE APPOINTMENT JSON:"
+        );
 
-        // Select updated row
-        selectAppointmentRow(appointmentNo);
+        System.out.println(json);
+
+        HttpResponse<String> response =
+                appointmentApiClient
+                        .updateAppointment(
+                                appointment
+                                        .getAppointmentId(),
+                                json
+                        );
+
+        if (response.statusCode() == 200) {
+
+            loadAppointments();
+
+            selectAppointmentRow(
+                    appointmentNo
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Appointment updated successfully."
+            );
+
+        } else {
+
+            showApiError(
+                    response,
+                    "Update Appointment Error"
+            );
+        }
+
+    } catch (
+            java.time.format.DateTimeParseException e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Appointment updated successfully."
+                "Invalid date or time format.",
+                "Update Appointment Error",
+                JOptionPane.ERROR_MESSAGE
         );
 
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                "Error: " + e.getMessage(),
-                "Update Error",
+                e.getMessage(),
+                "Update Appointment Error",
                 JOptionPane.ERROR_MESSAGE
         );
     }
@@ -774,20 +1023,51 @@ public class AppointmentForm extends javax.swing.JFrame {
                         .getText()
                         .trim();
 
-        Appointment appointment =
-                appointmentDAO.findByNo(
-                        appointmentNo
-                );
-
-        if (appointment == null) {
+        if (appointmentNo.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Appointment not found."
+                    "Please enter an appointment number.",
+                    "Search",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
+
+        HttpResponse<String> response =
+                appointmentApiClient
+                        .searchAppointment(
+                                appointmentNo
+                        );
+
+        if (response.statusCode() == 404) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Appointment not found.",
+                    "Search",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        if (response.statusCode() != 200) {
+
+            showApiError(
+                    response,
+                    "Search Error"
+            );
+
+            return;
+        }
+
+        Appointment appointment =
+                objectMapper.readValue(
+                        response.body(),
+                        Appointment.class
+                );
 
         txtAppointmentNo.setText(
                 appointment.getAppointmentNo()
@@ -808,7 +1088,9 @@ public class AppointmentForm extends javax.swing.JFrame {
         );
 
         txtNotes.setText(
-                appointment.getNotes()
+                appointment.getNotes() == null
+                        ? ""
+                        : appointment.getNotes()
         );
 
         selectPatient(
@@ -823,11 +1105,17 @@ public class AppointmentForm extends javax.swing.JFrame {
                 appointment.getTreatmentId()
         );
 
+        selectAppointmentRow(
+                appointment.getAppointmentNo()
+        );
+
     } catch (Exception e) {
 
         JOptionPane.showMessageDialog(
                 this,
-                e.getMessage()
+                e.getMessage(),
+                "Search Error",
+                JOptionPane.ERROR_MESSAGE
         );
     }
     }//GEN-LAST:event_btnSearchAppointmentActionPerformed
@@ -860,6 +1148,35 @@ public class AppointmentForm extends javax.swing.JFrame {
     tblAppointments.clearSelection();
     }//GEN-LAST:event_btnClearAppointmentActionPerformed
 
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+         goBackToDashboard();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void showApiError(
+        HttpResponse<String> response,
+        String title) {
+
+    JOptionPane.showMessageDialog(
+            this,
+            "HTTP Status: "
+            + response.statusCode()
+            + "\n\nServer Response:\n"
+            + response.body(),
+            title,
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+    
+    private void goBackToDashboard() {
+
+    DashboardForm dashboard =
+            new DashboardForm(currentUser);
+
+    dashboard.setVisible(true);
+
+    this.dispose();
+}
     /**
      * @param args the command line arguments
      */
@@ -888,6 +1205,7 @@ public class AppointmentForm extends javax.swing.JFrame {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnCancelAppointment;
     private javax.swing.JButton btnClearAppointment;
     private javax.swing.JButton btnSaveAppointment;

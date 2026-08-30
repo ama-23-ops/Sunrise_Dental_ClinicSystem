@@ -1,6 +1,9 @@
 package com.sunrisedental.model;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Patient {
     private int patientId; 
     private String firstName,lastName,address,contactNumber,email,gender; 
@@ -21,5 +24,10 @@ public class Patient {
     public void setDateOfBirth(LocalDate v){dateOfBirth=v;}
     public String getGender(){return gender;} 
     public void setGender(String v){gender=v;}
-    public String getFullName(){return firstName + (lastName==null||lastName.isBlank()?"":" "+lastName);}
-}
+@JsonIgnore
+public String getFullName(){
+    return firstName
+            + (lastName == null || lastName.isBlank()
+                    ? ""
+                    : " " + lastName);
+}}
