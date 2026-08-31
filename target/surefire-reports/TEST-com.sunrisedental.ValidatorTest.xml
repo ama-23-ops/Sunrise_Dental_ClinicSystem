@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.sunrisedental.BillingServiceTest" time="0.056" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.sunrisedental.ValidatorTest" time="0.008" tests="2" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="26"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -60,5 +60,6 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="70.0"/>
   </properties>
-  <testcase name="calculatesTotalCorrectly" classname="com.sunrisedental.BillingServiceTest" time="0.036"/>
+  <testcase name="acceptsSriLankanPhone" classname="com.sunrisedental.ValidatorTest" time="0.004"/>
+  <testcase name="rejectsInvalidPhone" classname="com.sunrisedental.ValidatorTest" time="0.002"/>
 </testsuite>
