@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.sunrisedental.service.TreatmentServiceTest
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.370 s -- in com.sunrisedental.service.TreatmentServiceTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in com.sunrisedental.service.TreatmentServiceTest

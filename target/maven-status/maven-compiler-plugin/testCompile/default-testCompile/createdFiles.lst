@@ -1,0 +1,9 @@
+com\sunrisedental\service\AppointmentServiceTest.class
+com\sunrisedental\service\BillingServiceTest.class
+com\sunrisedental\BillingServiceTest.class
+com\sunrisedental\util\ValidatorTest.class
+com\sunrisedental\service\PatientServiceTest.class
+com\sunrisedental\ValidatorTest.class
+com\sunrisedental\service\TreatmentServiceTest.class
+com\sunrisedental\service\AuthServiceTest.class
+com\sunrisedental\service\DentistServiceTest.class

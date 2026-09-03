@@ -18,6 +18,21 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.sunrisedental.util.ColorTheme;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+
 /**
  *
  * @author iffah
@@ -37,6 +52,8 @@ public class ReportsForm extends javax.swing.JFrame {
     initComponents();
 
     this.currentUser = currentUser;
+    
+    setupReportsUI();
 }
     
     private final ReportApiClient reportApiClient =
@@ -50,6 +67,300 @@ private final ObjectMapper objectMapper =
                                 .FAIL_ON_UNKNOWN_PROPERTIES,
                         false
                 );
+
+private void setupReportsUI() {
+
+    setTitle("Sunrise Dental Clinic - Daily Appointment Reports");
+    getContentPane().setBackground(ColorTheme.BACKGROUND);
+
+    styleReportTitle();
+    styleReportLabels();
+    styleReportDateField();
+    styleReportButtons();
+    styleReportTable();
+}
+
+private void styleReportTitle() {
+
+    jLabel1.setText("DAILY APPOINTMENT REPORT");
+
+    jLabel1.setFont(
+            new Font("Segoe UI", Font.BOLD, 26)
+    );
+
+    jLabel1.setForeground(
+            ColorTheme.PRIMARY_DARK
+    );
+
+    jLabel1.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+    jLabel1.setVerticalAlignment(
+            SwingConstants.CENTER
+    );
+}
+
+private void styleReportLabels() {
+
+    jLabel2.setFont(
+            new Font("Segoe UI", Font.BOLD, 13)
+    );
+
+    jLabel2.setForeground(
+            ColorTheme.TEXT
+    );
+}
+
+private void styleReportDateField() {
+
+    txtReportDate.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    txtReportDate.setForeground(
+            ColorTheme.SECONDARY_TEXT
+    );
+
+    txtReportDate.setBackground(
+            ColorTheme.WHITE
+    );
+
+    txtReportDate.setCaretColor(
+            ColorTheme.PRIMARY
+    );
+
+    txtReportDate.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER,
+                            1
+                    ),
+                    new EmptyBorder(
+                            7, 10, 7, 10
+                    )
+            )
+    );
+}
+
+private void styleReportButtons() {
+
+    styleReportButton(
+            btnGenerateDailyReport,
+            "GENERATE REPORT",
+            ColorTheme.PRIMARY,
+            ColorTheme.WHITE
+    );
+
+    styleReportButton(
+            btnClearReport,
+            "CLEAR",
+            ColorTheme.SECONDARY_TEXT,
+            ColorTheme.WHITE
+    );
+
+    styleReportButton(
+            btnBack,
+            "←  BACK",
+            ColorTheme.PRIMARY_DARK,
+            ColorTheme.WHITE
+    );
+}
+
+private void styleReportButton(
+        JButton button,
+        String text,
+        Color background,
+        Color foreground) {
+
+    button.setText(text);
+
+    button.setFont(
+            new Font("Segoe UI", Font.BOLD, 12)
+    );
+
+    button.setForeground(foreground);
+    button.setBackground(background);
+
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setOpaque(true);
+
+    button.setCursor(
+            new Cursor(Cursor.HAND_CURSOR)
+    );
+
+    button.setBorder(
+            new EmptyBorder(
+                    9, 15, 9, 15
+            )
+    );
+}
+
+private void styleReportTable() {
+
+    tblReport.setFont(
+            new Font("Segoe UI", Font.PLAIN, 12)
+    );
+
+    tblReport.setForeground(
+            ColorTheme.TEXT
+    );
+
+    tblReport.setBackground(
+            ColorTheme.WHITE
+    );
+
+    tblReport.setRowHeight(30);
+
+    tblReport.setGridColor(
+            ColorTheme.BORDER
+    );
+
+    tblReport.setShowVerticalLines(false);
+    tblReport.setShowHorizontalLines(true);
+
+    tblReport.setSelectionBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    tblReport.setSelectionForeground(
+            ColorTheme.TEXT
+    );
+
+    tblReport.setFillsViewportHeight(true);
+
+
+    JTableHeader header =
+        tblReport.getTableHeader();
+
+    header.setReorderingAllowed(false);
+
+    header.setPreferredSize(
+        new Dimension(
+                header.getPreferredSize().width,
+                42
+        )
+    );
+
+    // Custom header renderer
+    DefaultTableCellRenderer headerRenderer =
+        new DefaultTableCellRenderer();
+
+    headerRenderer.setHorizontalAlignment(
+        SwingConstants.LEFT
+    );
+
+    headerRenderer.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+
+    headerRenderer.setFont(
+        new Font(
+                "Segoe UI",
+                Font.BOLD,
+                14
+        )
+    );
+
+    headerRenderer.setForeground(
+        ColorTheme.WHITE
+    );
+
+    headerRenderer.setBackground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    headerRenderer.setOpaque(true);
+
+    headerRenderer.setBorder(
+        BorderFactory.createMatteBorder(
+                0, 0, 2, 0,
+                ColorTheme.PRIMARY
+        )
+);
+
+    header.setDefaultRenderer(headerRenderer);
+
+
+    // Center selected columns
+    DefaultTableCellRenderer centerRenderer =
+            new DefaultTableCellRenderer();
+
+    centerRenderer.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+
+    tblReport
+            .getColumnModel()
+            .getColumn(0)
+            .setCellRenderer(centerRenderer);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(4)
+            .setCellRenderer(centerRenderer);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(5)
+            .setCellRenderer(centerRenderer);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(6)
+            .setCellRenderer(centerRenderer);
+
+
+    // Column widths
+    tblReport
+            .getColumnModel()
+            .getColumn(0)
+            .setPreferredWidth(100);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(1)
+            .setPreferredWidth(140);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(2)
+            .setPreferredWidth(130);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(3)
+            .setPreferredWidth(150);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(4)
+            .setPreferredWidth(90);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(5)
+            .setPreferredWidth(80);
+
+    tblReport
+            .getColumnModel()
+            .getColumn(6)
+            .setPreferredWidth(100);
+
+
+    jScrollPane1.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER,
+                    1
+            )
+    );
+
+    jScrollPane1.getViewport().setBackground(
+            ColorTheme.WHITE
+    );
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -71,7 +382,7 @@ private final ObjectMapper objectMapper =
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("REPORTS                            ");
+        jLabel1.setText("DAILY APPONMENT REPORT                            ");
 
         jLabel2.setText("Report Date:");
 
@@ -105,51 +416,44 @@ private final ObjectMapper objectMapper =
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(61, 61, 61)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(69, 69, 69)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnGenerateDailyReport)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnBack)
-                    .addComponent(btnClearReport))
-                .addContainerGap(48, Short.MAX_VALUE))
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 603, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnBack))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnGenerateDailyReport)
+                                .addGap(29, 29, 29)
+                                .addComponent(btnClearReport)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(61, 61, 61)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 718, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addComponent(btnBack)))
-                .addGap(18, 18, 18)
+                .addGap(24, 24, 24)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnBack)
+                    .addComponent(jLabel1))
+                .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(btnGenerateDailyReport)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnClearReport)
-                        .addGap(232, 232, 232))))
+                    .addComponent(txtReportDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnGenerateDailyReport)
+                    .addComponent(btnClearReport))
+                .addGap(59, 59, 59)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -292,8 +596,8 @@ private final ObjectMapper objectMapper =
 
     private void btnClearReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearReportActionPerformed
         // TODO add your handling code here:
-        txtReportDate.setText("");
-
+    txtReportDate.setText("YYYY-MM-DD");
+    
     DefaultTableModel model =
             (DefaultTableModel)
             tblReport.getModel();

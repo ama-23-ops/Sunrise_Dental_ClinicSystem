@@ -15,6 +15,21 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.sunrisedental.util.ColorTheme;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 /**
  *
  * @author iffah
@@ -35,8 +50,9 @@ public class DentistForm extends javax.swing.JFrame {
     initComponents();
 
     this.currentUser = currentUser;
-
     
+    setupDentistUI();
+
         setLocationRelativeTo(null);
 
         txtDentistId.setEditable(false);
@@ -107,6 +123,302 @@ private final ObjectMapper objectMapper =
         );
     }
 }
+    
+    private void setupDentistUI() {
+
+    setTitle("Sunrise Dental Clinic - Dentist Management");
+    getContentPane().setBackground(ColorTheme.BACKGROUND);
+
+    styleDentistTitle();
+    styleDentistLabels();
+    styleDentistFields();
+    styleDentistButtons();
+    styleDentistTable();
+    styleDentistCheckBox();
+}
+    
+    private void styleDentistTitle() {
+
+    jLabel1.setText("DENTIST MANAGEMENT");
+    jLabel1.setFont(new Font("Segoe UI", Font.BOLD, 26));
+    jLabel1.setForeground(ColorTheme.PRIMARY_DARK);
+
+    jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel1.setVerticalAlignment(SwingConstants.CENTER);
+}
+    
+    private void styleDentistLabels() {
+
+    styleDentistLabel(jLabel2);
+    styleDentistLabel(jLabel3);
+    styleDentistLabel(jLabel4);
+    styleDentistLabel(jLabel5);
+    styleDentistLabel(jLabel6);
+}
+
+private void styleDentistLabel(javax.swing.JLabel label) {
+
+    label.setFont(
+            new Font("Segoe UI", Font.BOLD, 13)
+    );
+
+    label.setForeground(ColorTheme.TEXT);
+}
+
+private void styleDentistFields() {
+
+    styleDentistTextField(txtDentistId);
+    styleDentistTextField(txtDentistName);
+    styleDentistTextField(txtDentistContact);
+    styleDentistTextField(txtSpecialization);
+
+    // Auto-generated ID
+    txtDentistId.setBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    txtDentistId.setForeground(
+            ColorTheme.SECONDARY_TEXT
+    );
+}
+
+private void styleDentistTextField(JTextField field) {
+
+    field.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    field.setForeground(ColorTheme.TEXT);
+    field.setBackground(ColorTheme.WHITE);
+    field.setCaretColor(ColorTheme.PRIMARY);
+
+    field.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER,
+                            1
+                    ),
+                    new EmptyBorder(
+                            7, 10, 7, 10
+                    )
+            )
+    );
+}
+
+private void styleDentistCheckBox() {
+
+    chkActive.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    chkActive.setForeground(
+            ColorTheme.TEXT
+    );
+
+    chkActive.setBackground(
+            ColorTheme.BACKGROUND
+    );
+
+    chkActive.setFocusPainted(false);
+}
+
+private void styleDentistButtons() {
+
+    styleDentistButton(
+            btnSaveDentist,
+            "SAVE",
+            ColorTheme.PRIMARY,
+            ColorTheme.WHITE
+    );
+
+    styleDentistButton(
+            btnUpdateDentist,
+            "UPDATE",
+            ColorTheme.GOLD,
+            ColorTheme.TEXT
+    );
+
+    styleDentistButton(
+            btnClearDentist,
+            "CLEAR",
+            ColorTheme.SECONDARY_TEXT,
+            ColorTheme.WHITE
+    );
+
+    styleDentistButton(
+            btnBack,
+            "←  BACK",
+            ColorTheme.PRIMARY_DARK,
+            ColorTheme.WHITE
+    );
+}
+
+private void styleDentistButton(
+        JButton button,
+        String text,
+        Color background,
+        Color foreground) {
+
+    button.setText(text);
+
+    button.setFont(
+            new Font("Segoe UI", Font.BOLD, 12)
+    );
+
+    button.setForeground(foreground);
+    button.setBackground(background);
+
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setOpaque(true);
+
+    button.setCursor(
+            new Cursor(Cursor.HAND_CURSOR)
+    );
+
+    button.setBorder(
+            new EmptyBorder(
+                    9, 15, 9, 15
+            )
+    );
+}
+
+private void styleDentistTable() {
+
+    tblDentists.setFont(
+            new Font("Segoe UI", Font.PLAIN, 12)
+    );
+
+    tblDentists.setForeground(
+            ColorTheme.TEXT
+    );
+
+    tblDentists.setBackground(
+            ColorTheme.WHITE
+    );
+
+    tblDentists.setRowHeight(30);
+
+    tblDentists.setGridColor(
+            ColorTheme.BORDER
+    );
+
+    tblDentists.setShowVerticalLines(false);
+    tblDentists.setShowHorizontalLines(true);
+
+    tblDentists.setSelectionBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    tblDentists.setSelectionForeground(
+            ColorTheme.TEXT
+    );
+
+    tblDentists.setFillsViewportHeight(true);
+        
+         JTableHeader header =
+        tblDentists.getTableHeader();
+
+    header.setReorderingAllowed(false);
+
+    header.setPreferredSize(
+        new Dimension(
+                header.getPreferredSize().width,
+                42
+        )
+);
+
+   // Custom header renderer
+   DefaultTableCellRenderer headerRenderer =
+        new DefaultTableCellRenderer();
+
+   headerRenderer.setHorizontalAlignment(
+        SwingConstants.LEFT
+   );
+
+   headerRenderer.setVerticalAlignment(
+        SwingConstants.CENTER
+   );
+
+   headerRenderer.setFont(
+        new Font(
+                "Segoe UI",
+                Font.BOLD,
+                14
+        )
+   );
+
+   headerRenderer.setForeground(
+        ColorTheme.WHITE
+   );
+
+   headerRenderer.setBackground(
+        ColorTheme.PRIMARY_DARK
+   );
+
+   headerRenderer.setOpaque(true);
+
+   headerRenderer.setBorder(
+        BorderFactory.createMatteBorder(
+                0, 0, 2, 0,
+                ColorTheme.PRIMARY
+        )
+   );
+
+   header.setDefaultRenderer(headerRenderer);
+
+    // Center Dentist ID
+    DefaultTableCellRenderer centerRenderer =
+            new DefaultTableCellRenderer();
+
+    centerRenderer.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+    tblDentists
+            .getColumnModel()
+            .getColumn(0)
+            .setCellRenderer(centerRenderer);
+
+
+    // Column widths
+    tblDentists
+            .getColumnModel()
+            .getColumn(0)
+            .setPreferredWidth(70);
+
+    tblDentists
+            .getColumnModel()
+            .getColumn(1)
+            .setPreferredWidth(150);
+
+    tblDentists
+            .getColumnModel()
+            .getColumn(2)
+            .setPreferredWidth(120);
+
+    tblDentists
+            .getColumnModel()
+            .getColumn(3)
+            .setPreferredWidth(160);
+
+    tblDentists
+            .getColumnModel()
+            .getColumn(4)
+            .setPreferredWidth(80);
+
+
+    jScrollPane1.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER,
+                    1
+            )
+    );
+
+    jScrollPane1.getViewport().setBackground(
+            ColorTheme.WHITE
+    );
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -149,6 +461,12 @@ private final ObjectMapper objectMapper =
 
         jLabel6.setText("Active: ");
 
+        txtDentistId.addActionListener(this::txtDentistIdActionPerformed);
+
+        txtDentistContact.addActionListener(this::txtDentistContactActionPerformed);
+
+        chkActive.addActionListener(this::chkActiveActionPerformed);
+
         btnSaveDentist.setText("SAVE");
         btnSaveDentist.addActionListener(this::btnSaveDentistActionPerformed);
 
@@ -183,78 +501,86 @@ private final ObjectMapper objectMapper =
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(61, 61, 61)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(225, 225, 225)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(71, 71, 71)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnSaveDentist)
-                                .addGap(48, 48, 48)
+                                .addGap(47, 47, 47)
                                 .addComponent(btnUpdateDentist)
-                                .addGap(18, 18, 18)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                                 .addComponent(btnClearDentist))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(70, 70, 70)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txtDentistId, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtDentistName, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtDentistContact, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtSpecialization, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(chkActive, javax.swing.GroupLayout.Alignment.LEADING))))))
-                .addGap(18, 18, 18)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34)
+                                .addComponent(txtSpecialization))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtDentistName))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtDentistId))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtDentistContact)))
+                        .addGap(30, 30, 30)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(154, 154, 154)
                 .addComponent(btnBack)
-                .addGap(51, 51, 51))
+                .addGap(48, 48, 48))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(69, 69, 69)
-                .addComponent(jLabel1)
-                .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(txtDentistId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtDentistName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(22, 22, 22)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(txtDentistContact, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(txtSpecialization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(chkActive))
-                .addGap(30, 30, 30)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSaveDentist)
-                    .addComponent(btnUpdateDentist)
-                    .addComponent(btnClearDentist))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(11, Short.MAX_VALUE)
-                .addComponent(btnBack)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(39, 39, 39)
+                        .addComponent(btnBack)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(txtDentistId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(31, 31, 31)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(txtDentistName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(33, 33, 33)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4)
+                            .addComponent(txtDentistContact, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(32, 32, 32)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(txtSpecialization, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(27, 27, 27)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel6)
+                            .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(39, 39, 39)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnSaveDentist)
+                            .addComponent(btnUpdateDentist)
+                            .addComponent(btnClearDentist)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 377, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         pack();
@@ -510,6 +836,18 @@ private final ObjectMapper objectMapper =
         // TODO add your handling code here:
          goBackToDashboard();
     }//GEN-LAST:event_btnBackActionPerformed
+
+    private void txtDentistIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDentistIdActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDentistIdActionPerformed
+
+    private void txtDentistContactActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDentistContactActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDentistContactActionPerformed
+
+    private void chkActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkActiveActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkActiveActionPerformed
 
     private void showApiError(
         HttpResponse<String> response,

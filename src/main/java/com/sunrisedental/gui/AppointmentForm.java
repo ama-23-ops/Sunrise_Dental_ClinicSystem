@@ -26,6 +26,22 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.sunrisedental.util.ColorTheme;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+
 /**
  *
  * @author iffah
@@ -44,6 +60,8 @@ public class AppointmentForm extends javax.swing.JFrame {
     initComponents();
 
     this.currentUser = currentUser;
+    
+    setupAppointmentUI();
 
     setLocationRelativeTo(null);
 
@@ -61,6 +79,459 @@ public class AppointmentForm extends javax.swing.JFrame {
     cmbStatus.addItem("CANCELLED");
 }
     
+    private void setupAppointmentUI() {
+
+    setTitle(
+        "Sunrise Dental Clinic - Appointment Management"
+    );
+
+    getContentPane().setBackground(
+        ColorTheme.BACKGROUND
+    );
+
+    styleAppointmentTitle();
+    styleAppointmentLabels();
+    styleAppointmentFields();
+    styleAppointmentButtons();
+    styleAppointmentTable();
+}
+    
+    private void styleAppointmentTitle() {
+
+    jLabel1.setText(
+        "APPOINTMENT MANAGEMENT"
+    );
+
+    jLabel1.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            26
+        )
+    );
+
+    jLabel1.setForeground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    jLabel1.setHorizontalAlignment(
+        SwingConstants.CENTER
+    );
+
+    jLabel1.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+}
+    
+    private void styleAppointmentLabels() {
+
+    styleAppointmentLabel(jLabel2);
+    styleAppointmentLabel(jLabel3);
+    styleAppointmentLabel(jLabel4);
+    styleAppointmentLabel(jLabel5);
+    styleAppointmentLabel(jLabel6);
+    styleAppointmentLabel(jLabel7);
+    styleAppointmentLabel(jLabel8);
+    styleAppointmentLabel(jLabel9);
+}
+    
+    private void styleAppointmentLabel(
+        javax.swing.JLabel label) {
+
+    label.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            13
+        )
+    );
+
+    label.setForeground(
+        ColorTheme.TEXT
+    );
+}
+    
+    private void styleAppointmentFields() {
+
+    // Text fields
+    styleAppointmentTextField(txtAppointmentNo);
+    styleAppointmentTextField(txtAppointmentDate);
+    styleAppointmentTextField(txtAppointmentTime);
+    styleAppointmentTextField(txtSearchAppointmentNo);
+
+
+    // Generated appointment number
+    txtAppointmentNo.setBackground(
+        ColorTheme.LIGHT_TEAL
+    );
+
+    txtAppointmentNo.setForeground(
+        ColorTheme.SECONDARY_TEXT
+    );
+
+
+    // Combo boxes
+    styleAppointmentComboBox(cmbPatient);
+    styleAppointmentComboBox(cmbDentist);
+    styleAppointmentComboBox(cmbTreatment);
+    styleAppointmentComboBox(cmbStatus);
+
+
+    // Notes
+    txtNotes.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            13
+        )
+    );
+
+    txtNotes.setForeground(
+        ColorTheme.TEXT
+    );
+
+    txtNotes.setBackground(
+        ColorTheme.WHITE
+    );
+
+    txtNotes.setLineWrap(true);
+    txtNotes.setWrapStyleWord(true);
+
+    jScrollPane1.setBorder(
+        BorderFactory.createLineBorder(
+            ColorTheme.BORDER,
+            1
+        )
+    );
+
+    jScrollPane1.getViewport()
+        .setBackground(
+            ColorTheme.WHITE
+        );
+}
+    
+    private void styleAppointmentTextField(
+        JTextField field) {
+
+    field.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            13
+        )
+    );
+
+    field.setForeground(
+        ColorTheme.TEXT
+    );
+
+    field.setBackground(
+        ColorTheme.WHITE
+    );
+
+    field.setCaretColor(
+        ColorTheme.PRIMARY
+    );
+
+    field.setBorder(
+        BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(
+                ColorTheme.BORDER,
+                1
+            ),
+            new EmptyBorder(
+                7,
+                10,
+                7,
+                10
+            )
+        )
+    );
+}
+    
+    private void styleAppointmentComboBox(
+        JComboBox<String> comboBox) {
+
+    comboBox.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            13
+        )
+    );
+
+    comboBox.setForeground(
+        ColorTheme.TEXT
+    );
+
+    comboBox.setBackground(
+        ColorTheme.WHITE
+    );
+
+    comboBox.setBorder(
+        BorderFactory.createLineBorder(
+            ColorTheme.BORDER,
+            1
+        )
+    );
+}
+    
+    private void styleAppointmentButtons() {
+
+    styleAppointmentButton(
+        btnSaveAppointment,
+        "SAVE",
+        ColorTheme.PRIMARY,
+        ColorTheme.WHITE
+    );
+
+    styleAppointmentButton(
+        btnUpdateAppointment,
+        "UPDATE",
+        ColorTheme.GOLD,
+        ColorTheme.TEXT
+    );
+
+    styleAppointmentButton(
+        btnCancelAppointment,
+        "CANCEL APPOINTMENT",
+        ColorTheme.DANGER,
+        ColorTheme.WHITE
+    );
+
+    styleAppointmentButton(
+        btnClearAppointment,
+        "CLEAR",
+        ColorTheme.SECONDARY_TEXT,
+        ColorTheme.WHITE
+    );
+
+    styleAppointmentButton(
+        btnSearchAppointment,
+        "SEARCH",
+        ColorTheme.PRIMARY,
+        ColorTheme.WHITE
+    );
+
+    styleAppointmentButton(
+        btnBack,
+        "←  BACK",
+        ColorTheme.PRIMARY_DARK,
+        ColorTheme.WHITE
+    );
+}
+    
+    private void styleAppointmentButton(
+        JButton button,
+        String text,
+        Color background,
+        Color foreground) {
+
+    button.setText(text);
+
+    button.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            12
+        )
+    );
+
+    button.setForeground(
+        foreground
+    );
+
+    button.setBackground(
+        background
+    );
+
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setOpaque(true);
+
+    button.setCursor(
+        new Cursor(
+            Cursor.HAND_CURSOR
+        )
+    );
+
+    button.setBorder(
+        new EmptyBorder(
+            9,
+            15,
+            9,
+            15
+        )
+    );
+    
+}
+    private void styleAppointmentTable() {
+
+    tblAppointments.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            12
+        )
+    );
+
+    tblAppointments.setForeground(
+        ColorTheme.TEXT
+    );
+
+    tblAppointments.setBackground(
+        ColorTheme.WHITE
+    );
+
+    tblAppointments.setRowHeight(
+        30
+    );
+
+    tblAppointments.setGridColor(
+        ColorTheme.BORDER
+    );
+
+    tblAppointments.setShowVerticalLines(
+        false
+    );
+
+    tblAppointments.setShowHorizontalLines(
+        true
+    );
+
+    tblAppointments.setSelectionBackground(
+        ColorTheme.LIGHT_TEAL
+    );
+
+    tblAppointments.setSelectionForeground(
+        ColorTheme.TEXT
+    );
+
+    tblAppointments.setFillsViewportHeight(
+        true
+    );
+
+
+    // Table header
+    // =========================
+// TABLE HEADER
+// =========================
+JTableHeader header =
+        tblAppointments.getTableHeader();
+
+header.setPreferredSize(
+        new Dimension(
+                header.getPreferredSize().width,
+                42
+        )
+);
+
+    // Custom header renderer
+    DefaultTableCellRenderer headerRenderer =
+        new DefaultTableCellRenderer();
+
+    headerRenderer.setHorizontalAlignment(
+        SwingConstants.LEFT
+  );
+
+    headerRenderer.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+
+    headerRenderer.setFont(
+        new Font(
+                "Segoe UI",
+                Font.BOLD,
+                14
+        )
+    );
+
+     headerRenderer.setForeground(
+        ColorTheme.WHITE
+    );
+
+    headerRenderer.setBackground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    headerRenderer.setOpaque(true);
+
+    headerRenderer.setBorder(
+        BorderFactory.createMatteBorder(
+                0, 0, 2, 0,
+                ColorTheme.PRIMARY
+        )
+);
+
+    header.setDefaultRenderer(headerRenderer);
+
+
+    // Center ID column
+    DefaultTableCellRenderer centerRenderer =
+        new DefaultTableCellRenderer();
+
+    centerRenderer.setHorizontalAlignment(
+        SwingConstants.CENTER
+    );
+
+    tblAppointments
+        .getColumnModel()
+        .getColumn(0)
+        .setCellRenderer(
+            centerRenderer
+        );
+
+
+    // Column widths
+    tblAppointments.getColumnModel()
+        .getColumn(0)
+        .setPreferredWidth(70);
+
+    tblAppointments.getColumnModel()
+        .getColumn(1)
+        .setPreferredWidth(100);
+
+    tblAppointments.getColumnModel()
+        .getColumn(2)
+        .setPreferredWidth(100);
+
+    tblAppointments.getColumnModel()
+        .getColumn(3)
+        .setPreferredWidth(100);
+
+    tblAppointments.getColumnModel()
+        .getColumn(4)
+        .setPreferredWidth(100);
+
+    tblAppointments.getColumnModel()
+        .getColumn(5)
+        .setPreferredWidth(90);
+
+    tblAppointments.getColumnModel()
+        .getColumn(6)
+        .setPreferredWidth(70);
+
+    tblAppointments.getColumnModel()
+        .getColumn(7)
+        .setPreferredWidth(90);
+
+    tblAppointments.getColumnModel()
+        .getColumn(8)
+        .setPreferredWidth(150);
+
+
+    jScrollPane2.setBorder(
+        BorderFactory.createLineBorder(
+            ColorTheme.BORDER,
+            1
+        )
+    );
+
+    jScrollPane2.getViewport()
+        .setBackground(
+            ColorTheme.WHITE
+        );
+}
     private final AppointmentApiClient appointmentApiClient =
         new AppointmentApiClient();
 
@@ -477,67 +948,67 @@ private final ObjectMapper objectMapper =
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(73, 73, 73)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnSaveAppointment)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnUpdateAppointment)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnCancelAppointment)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnClearAppointment))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 403, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(37, 37, 37)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtAppointmentDate)
-                            .addComponent(cmbTreatment, 0, 177, Short.MAX_VALUE)
-                            .addComponent(cmbDentist, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cmbPatient, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtAppointmentNo)
-                            .addComponent(cmbStatus, 0, 177, Short.MAX_VALUE)
-                            .addComponent(txtAppointmentTime))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtSearchAppointmentNo, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSearchAppointment)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(228, 228, 228)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(597, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnBack)
                 .addGap(51, 51, 51))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(73, 73, 73)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnSaveAppointment)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnUpdateAppointment)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnCancelAppointment)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnClearAppointment))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 403, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                                        .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(37, 37, 37)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtAppointmentDate)
+                                    .addComponent(cmbTreatment, 0, 177, Short.MAX_VALUE)
+                                    .addComponent(cmbDentist, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cmbPatient, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtAppointmentNo)
+                                    .addComponent(cmbStatus, 0, 177, Short.MAX_VALUE)
+                                    .addComponent(txtAppointmentTime))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(txtSearchAppointmentNo, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnSearchAppointment))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 818, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(339, 339, 339)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 447, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(btnBack)
-                .addGap(9, 9, 9)
+                .addGap(4, 4, 4)
+                .addComponent(jLabel1)
+                .addGap(48, 48, 48)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(43, 43, 43)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(txtAppointmentNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -574,13 +1045,14 @@ private final ObjectMapper objectMapper =
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
+                        .addGap(27, 27, 27)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnSaveAppointment)
                             .addComponent(btnUpdateAppointment)
                             .addComponent(btnCancelAppointment)
-                            .addComponent(btnClearAppointment))))
-                .addContainerGap(50, Short.MAX_VALUE))
+                            .addComponent(btnClearAppointment))
+                        .addGap(10, 10, 10)))
+                .addContainerGap(90, Short.MAX_VALUE))
         );
 
         pack();
@@ -1125,8 +1597,8 @@ private final ObjectMapper objectMapper =
         txtAppointmentNo.setText("");
     txtSearchAppointmentNo.setText("");
 
-    txtAppointmentDate.setText("");
-    txtAppointmentTime.setText("");
+    txtAppointmentDate.setText("YYYY-MM-DD");
+    txtAppointmentTime.setText("HH:MM");
     txtNotes.setText("");
 
     if (cmbPatient.getItemCount() > 0) {

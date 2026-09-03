@@ -13,6 +13,23 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.sunrisedental.util.ColorTheme;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+
 /**
  *
  * @author iffah
@@ -38,6 +55,7 @@ public class UserForm extends javax.swing.JFrame {
     initComponents();
 
     this.currentUser = currentUser;
+    setupUserUI();
 
     setLocationRelativeTo(null);
 
@@ -48,6 +66,388 @@ public class UserForm extends javax.swing.JFrame {
     cmbRole.addItem("RECEPTIONIST");
 
     loadUsers();
+}
+    
+    private void setupUserUI() {
+
+    setTitle("Sunrise Dental Clinic - User Management");
+    getContentPane().setBackground(ColorTheme.BACKGROUND);
+
+    styleUserTitle();
+    styleUserLabels();
+    styleUserFields();
+    styleUserComboBox();
+    styleUserButtons();
+    styleUserTable();
+}
+    
+    private void styleUserTitle() {
+
+    jLabel1.setText("USER MANAGEMENT");
+
+    jLabel1.setFont(
+            new Font("Segoe UI", Font.BOLD, 26)
+    );
+
+    jLabel1.setForeground(
+            ColorTheme.PRIMARY_DARK
+    );
+
+    jLabel1.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+    jLabel1.setVerticalAlignment(
+            SwingConstants.CENTER
+    );
+}
+    
+    private void styleUserLabels() {
+
+    styleUserLabel(jLabel2);
+    styleUserLabel(jLabel3);
+    styleUserLabel(jLabel4);
+    styleUserLabel(jLabel5);
+    styleUserLabel(jLabel6);
+    styleUserLabel(jLabel7);
+
+    lblMessage.setFont(
+            new Font("Segoe UI", Font.BOLD, 13)
+    );
+
+    lblMessage.setForeground(
+            ColorTheme.TEXT
+    );
+}
+
+private void styleUserLabel(javax.swing.JLabel label) {
+
+    label.setFont(
+            new Font("Segoe UI", Font.BOLD, 13)
+    );
+
+    label.setForeground(
+            ColorTheme.TEXT
+    );
+}
+
+private void styleUserFields() {
+
+    styleUserTextField(txtUserId);
+    styleUserTextField(txtUsername);
+    styleUserTextField(txtFullName);
+    styleUserTextField(txtSearchUsername);
+
+    styleUserPasswordField(txtPassword);
+    styleUserPasswordField(txtConfirmPassword);
+
+    // Auto-generated ID
+    txtUserId.setBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    txtUserId.setForeground(
+            ColorTheme.SECONDARY_TEXT
+    );
+
+    // Search field
+    txtSearchUsername.setBackground(
+            ColorTheme.WHITE
+    );
+}
+
+private void styleUserTextField(JTextField field) {
+
+    field.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    field.setForeground(
+            ColorTheme.TEXT
+    );
+
+    field.setBackground(
+            ColorTheme.WHITE
+    );
+
+    field.setCaretColor(
+            ColorTheme.PRIMARY
+    );
+
+    field.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER,
+                            1
+                    ),
+                    new EmptyBorder(
+                            7, 10, 7, 10
+                    )
+            )
+    );
+}
+
+private void styleUserPasswordField(
+        JPasswordField field) {
+
+    field.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    field.setForeground(
+            ColorTheme.TEXT
+    );
+
+    field.setBackground(
+            ColorTheme.WHITE
+    );
+
+    field.setCaretColor(
+            ColorTheme.PRIMARY
+    );
+
+    field.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER,
+                            1
+                    ),
+                    new EmptyBorder(
+                            7, 10, 7, 10
+                    )
+            )
+    );
+}
+
+private void styleUserComboBox() {
+
+    cmbRole.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    cmbRole.setForeground(
+            ColorTheme.TEXT
+    );
+
+    cmbRole.setBackground(
+            ColorTheme.WHITE
+    );
+
+    cmbRole.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER,
+                    1
+            )
+    );
+}
+
+private void styleUserButtons() {
+
+    styleUserButton(
+            btnSaveUser,
+            "SAVE",
+            ColorTheme.PRIMARY,
+            ColorTheme.WHITE
+    );
+
+    styleUserButton(
+            btnUpdateUser,
+            "UPDATE",
+            ColorTheme.GOLD,
+            ColorTheme.TEXT
+    );
+
+    styleUserButton(
+            btnDeleteUser,
+            "DELETE",
+            ColorTheme.DANGER,
+            ColorTheme.WHITE
+    );
+
+    styleUserButton(
+            btnClearUser,
+            "CLEAR",
+            ColorTheme.SECONDARY_TEXT,
+            ColorTheme.WHITE
+    );
+
+    styleUserButton(
+            btnSearchUser,
+            "SEARCH",
+            ColorTheme.PRIMARY,
+            ColorTheme.WHITE
+    );
+
+    styleUserButton(
+            btnBack,
+            "←  BACK",
+            ColorTheme.PRIMARY_DARK,
+            ColorTheme.WHITE
+    );
+}
+
+private void styleUserButton(
+        JButton button,
+        String text,
+        Color background,
+        Color foreground) {
+
+    button.setText(text);
+
+    button.setFont(
+            new Font("Segoe UI", Font.BOLD, 12)
+    );
+
+    button.setForeground(foreground);
+    button.setBackground(background);
+
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setOpaque(true);
+
+    button.setCursor(
+            new Cursor(Cursor.HAND_CURSOR)
+    );
+
+    button.setBorder(
+            new EmptyBorder(
+                    9, 15, 9, 15
+            )
+    );
+}
+
+private void styleUserTable() {
+
+    tblUsers.setFont(
+            new Font("Segoe UI", Font.PLAIN, 12)
+    );
+
+    tblUsers.setForeground(
+            ColorTheme.TEXT
+    );
+
+    tblUsers.setBackground(
+            ColorTheme.WHITE
+    );
+
+    tblUsers.setRowHeight(30);
+
+    tblUsers.setGridColor(
+            ColorTheme.BORDER
+    );
+
+    tblUsers.setShowVerticalLines(false);
+    tblUsers.setShowHorizontalLines(true);
+
+    tblUsers.setSelectionBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    tblUsers.setSelectionForeground(
+            ColorTheme.TEXT
+    );
+
+    tblUsers.setFillsViewportHeight(true);
+
+
+    JTableHeader header =
+        tblUsers.getTableHeader();
+
+    header.setReorderingAllowed(false);
+
+    header.setPreferredSize(
+        new Dimension(
+                header.getPreferredSize().width,
+                42
+        )
+   );
+
+    // Custom header renderer
+   DefaultTableCellRenderer headerRenderer =
+        new DefaultTableCellRenderer();
+
+    headerRenderer.setHorizontalAlignment(
+        SwingConstants.LEFT
+    );
+
+    headerRenderer.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+
+    headerRenderer.setFont(
+        new Font(
+                "Segoe UI",
+                Font.BOLD,
+                14
+        )
+    );
+
+    headerRenderer.setForeground(
+        ColorTheme.WHITE
+    );
+
+    headerRenderer.setBackground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    headerRenderer.setOpaque(true);
+
+    headerRenderer.setBorder(
+        BorderFactory.createMatteBorder(
+                0, 0, 2, 0,
+                ColorTheme.PRIMARY
+        )
+   );
+
+   header.setDefaultRenderer(headerRenderer);
+
+
+    // Center User ID
+    DefaultTableCellRenderer centerRenderer =
+            new DefaultTableCellRenderer();
+
+    centerRenderer.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+    tblUsers
+            .getColumnModel()
+            .getColumn(0)
+            .setCellRenderer(centerRenderer);
+
+
+    // Column widths
+    tblUsers
+            .getColumnModel()
+            .getColumn(0)
+            .setPreferredWidth(70);
+
+    tblUsers
+            .getColumnModel()
+            .getColumn(1)
+            .setPreferredWidth(130);
+
+    tblUsers
+            .getColumnModel()
+            .getColumn(2)
+            .setPreferredWidth(160);
+
+    tblUsers
+            .getColumnModel()
+            .getColumn(3)
+            .setPreferredWidth(110);
+
+
+    jScrollPane1.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER,
+                    1
+            )
+    );
+
+    jScrollPane1.getViewport().setBackground(
+            ColorTheme.WHITE
+    );
 }
    
     private void loadUsers() {
@@ -182,48 +582,54 @@ public class UserForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(55, 55, 55)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnSaveUser)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnUpdateUser)
-                                .addGap(154, 154, 154)
-                                .addComponent(btnDeleteUser))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtSearchUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(43, 43, 43)
+                                .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(lblMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtFullName, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cmbRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtUserId, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtConfirmPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(99, 99, 99)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnClearUser)
-                            .addComponent(btnSearchUser)))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(txtUserId, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txtUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                                        .addComponent(txtConfirmPassword)
+                                        .addComponent(txtFullName))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(btnDeleteUser)
+                                            .addComponent(cmbRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnClearUser))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(btnSaveUser)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnUpdateUser))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtSearchUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnSearchUser))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(47, 47, 47)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(80, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(192, 192, 192)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(169, 169, 169)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(41, 41, 41)
                 .addComponent(btnBack)
                 .addGap(28, 28, 28))
         );
@@ -231,9 +637,9 @@ public class UserForm extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(btnBack))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnBack)
+                    .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtUserId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -264,18 +670,14 @@ public class UserForm extends javax.swing.JFrame {
                     .addComponent(btnUpdateUser)
                     .addComponent(btnDeleteUser)
                     .addComponent(btnClearUser))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel7)
-                            .addComponent(txtSearchUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(btnSearchUser)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtSearchUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearchUser, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(39, 39, 39)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         pack();

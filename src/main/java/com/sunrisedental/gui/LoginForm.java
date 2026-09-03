@@ -10,10 +10,23 @@ import javax.swing.JOptionPane;
 import com.sunrisedental.util.ColorTheme;
 import java.awt.Panel;
 import javax.swing.ImageIcon;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Insets;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.BorderLayout;
+import java.awt.Component;
 
 import java.net.http.HttpResponse;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 /**
  *
@@ -39,16 +52,330 @@ public class LoginForm extends javax.swing.JFrame {
     public LoginForm() {
         initComponents();
         
-        jPanel1.setBackground(ColorTheme.PRIMARY);
-        jPanel2.setBackground(ColorTheme.BACKGROUND);
-        btnLogin.setBackground(ColorTheme.GOLD);
-        
-        ImageIcon icon = new ImageIcon(
-    getClass().getResource("/images/logo4.png")
-);
-        jLabel1.setIcon(icon);
+        setupLoginUI();
+        setupBrandQuote();
+
+        setLocationRelativeTo(null);
     }
     
+    private void setupBrandQuote() {
+
+    lblBrandQuote.setText(
+        "<html><div style='text-align:center;'>"
+        + "\"Bright Smiles.<br>"
+        + "Better Care.<br>"
+        + "Every Day.\""
+        + "</div></html>"
+    );
+
+    lblBrandQuote.setFont(
+        new Font(
+            "Segoe UI",
+            Font.ITALIC,
+            19
+        )
+    );
+
+    lblBrandQuote.setForeground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    lblBrandQuote.setHorizontalAlignment(
+        SwingConstants.CENTER
+    );
+
+    lblBrandQuote.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+
+    lblBrandQuote.setOpaque(false);
+}
+    
+    private void setupLoginUI() {
+
+    // ==========================================
+    // MAIN WINDOW
+    // ==========================================
+
+    getContentPane().setBackground(ColorTheme.BACKGROUND);
+
+    setTitle("Sunrise Dental Clinic - Login");
+
+    setResizable(false);
+
+
+    // ==========================================
+    // PANELS
+    // ==========================================
+
+    jPanel1.setBackground(ColorTheme.PRIMARY);
+    jPanel2.setBackground(ColorTheme.BACKGROUND);
+
+    // ==========================================
+    // TITLE
+    // ==========================================
+
+    lblTitle.setForeground(ColorTheme.WHITE);
+
+    lblTitle.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            24
+        )
+    );
+
+
+    // ==========================================
+    // FORM LABELS
+    // ==========================================
+
+    lblUsername.setForeground(ColorTheme.WHITE);
+
+    lblPassword.setForeground(ColorTheme.WHITE);
+
+    lblUsername.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            15
+        )
+    );
+
+    lblPassword.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            15
+        )
+    );
+
+
+    // ==========================================
+    // TEXT FIELDS
+    // ==========================================
+
+    styleTextField(txtUsername);
+
+    stylePasswordField(txtPassword);
+
+
+    // ==========================================
+    // LOGIN BUTTON
+    // ==========================================
+
+    stylePrimaryButton(
+        btnLogin,
+        ColorTheme.GOLD,
+        ColorTheme.TEXT
+    );
+
+
+    // ==========================================
+    // CLEAR BUTTON
+    // ==========================================
+
+    styleSecondaryButton(btnClear);
+
+
+    // ==========================================
+    // MESSAGE
+    // ==========================================
+
+    lblMessage.setForeground(
+        ColorTheme.DANGER
+    );
+
+    lblMessage.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            13
+        )
+    );
+
+
+    // ==========================================
+    // LOGO
+    // ==========================================
+
+    jLabel1.setIcon(
+    new ImageIcon(
+        getClass().getResource("/images/sunrise_logo.png")
+    )
+);
+
+    
+
+    jLabel1.setText("");
+
+
+    // ==========================================
+    // FOCUS
+    // ==========================================
+
+    txtUsername.requestFocusInWindow();
+    
+    
+}
+    
+    private void styleTextField(
+        javax.swing.JTextField field) {
+
+    field.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            15
+        )
+    );
+
+    field.setForeground(
+        ColorTheme.TEXT
+    );
+
+    field.setBackground(
+        ColorTheme.WHITE
+    );
+
+    field.setCaretColor(
+        ColorTheme.PRIMARY
+    );
+
+    field.setBorder(
+        BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(
+                ColorTheme.BORDER,
+                1
+            ),
+            new EmptyBorder(
+                7,
+                10,
+                7,
+                10
+            )
+        )
+    );
+}
+    
+    private void stylePasswordField(
+        javax.swing.JPasswordField field) {
+
+    field.setFont(
+        new Font(
+            "Segoe UI",
+            Font.PLAIN,
+            15
+        )
+    );
+
+    field.setForeground(
+        ColorTheme.TEXT
+    );
+
+    field.setBackground(
+        ColorTheme.WHITE
+    );
+
+    field.setCaretColor(
+        ColorTheme.PRIMARY
+    );
+
+    field.setBorder(
+        BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(
+                ColorTheme.BORDER,
+                1
+            ),
+            new EmptyBorder(
+                7,
+                10,
+                7,
+                10
+            )
+        )
+    );
+}
+    
+    private void stylePrimaryButton(
+        javax.swing.JButton button,
+        Color background,
+        Color foreground) {
+
+    button.setBackground(background);
+
+    button.setForeground(foreground);
+
+    button.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            14
+        )
+    );
+
+    button.setFocusPainted(false);
+
+    button.setBorderPainted(false);
+
+    button.setOpaque(true);
+
+    button.setCursor(
+        new Cursor(
+            Cursor.HAND_CURSOR
+        )
+    );
+
+    button.setBorder(
+        new EmptyBorder(
+            10,
+            25,
+            10,
+            25
+        )
+    );
+}
+    
+    private void styleSecondaryButton(
+        javax.swing.JButton button) {
+
+    button.setBackground(
+        ColorTheme.LIGHT_TEAL
+    );
+
+    button.setForeground(
+        ColorTheme.PRIMARY_DARK
+    );
+
+    button.setFont(
+        new Font(
+            "Segoe UI",
+            Font.BOLD,
+            14
+        )
+    );
+
+    button.setFocusPainted(false);
+
+    button.setBorderPainted(false);
+
+    button.setOpaque(true);
+
+    button.setCursor(
+        new Cursor(
+            Cursor.HAND_CURSOR
+        )
+    );
+
+    button.setBorder(
+        new EmptyBorder(
+            10,
+            25,
+            10,
+            25
+        )
+    );
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -59,7 +386,6 @@ public class LoginForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblMessage = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
         lblUsername = new javax.swing.JLabel();
@@ -68,8 +394,10 @@ public class LoginForm extends javax.swing.JFrame {
         txtPassword = new javax.swing.JPasswordField();
         btnLogin = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        lblBrandQuote = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -96,33 +424,36 @@ public class LoginForm extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(87, 87, 87)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnLogin)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(lblPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(btnClear)
-                        .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(151, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(99, 99, 99))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtUsername, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
+                            .addComponent(txtPassword, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(9, 9, 9)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnClear))
+                            .addComponent(lblMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(52, 52, 52)
+                .addGap(67, 67, 67)
                 .addComponent(lblTitle)
-                .addGap(132, 132, 132)
+                .addGap(130, 130, 130)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(53, 53, 53)
+                .addGap(52, 52, 52)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblPassword)
                     .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -130,26 +461,35 @@ public class LoginForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnLogin)
                     .addComponent(btnClear))
-                .addGap(76, 76, 76))
+                .addGap(36, 36, 36)
+                .addComponent(lblMessage)
+                .addGap(100, 100, 100))
         );
 
         jLabel1.setText("jLabel1");
+
+        lblBrandQuote.setText("“Bright Smiles.Better Care.Every Day.”");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33))
+                .addContainerGap(45, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 405, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(19, 19, 19))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(lblBrandQuote, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(75, 75, 75)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(325, Short.MAX_VALUE))
+                .addGap(16, 16, 16)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblBrandQuote, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(152, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -157,26 +497,20 @@ public class LoginForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(120, 120, 120)
-                .addComponent(lblMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(108, 108, 108))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addComponent(lblMessage)
-                .addGap(49, 49, 49))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
 
         pack();
@@ -321,6 +655,7 @@ public class LoginForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel lblBrandQuote;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblTitle;

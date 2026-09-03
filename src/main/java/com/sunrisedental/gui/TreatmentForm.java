@@ -17,6 +17,23 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.sunrisedental.util.ColorTheme;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+
 /**
  *
  * @author iffah
@@ -37,6 +54,7 @@ public class TreatmentForm extends javax.swing.JFrame {
     initComponents();
 
     this.currentUser = currentUser;
+    setupTreatmentUI();
 
     setLocationRelativeTo(null);
 
@@ -108,6 +126,323 @@ private final ObjectMapper objectMapper =
                 JOptionPane.ERROR_MESSAGE
         );
     }
+}
+    
+    private void setupTreatmentUI() {
+
+    setTitle("Sunrise Dental Clinic - Treatment Management");
+    getContentPane().setBackground(ColorTheme.BACKGROUND);
+
+    styleTreatmentTitle();
+    styleTreatmentLabels();
+    styleTreatmentFields();
+    styleTreatmentButtons();
+    styleTreatmentTable();
+    styleTreatmentCheckBox();
+}
+    
+    private void styleTreatmentTitle() {
+
+    jLabel1.setText("TREATMENT MANAGEMENT");
+    jLabel1.setFont(new Font("Segoe UI", Font.BOLD, 26));
+    jLabel1.setForeground(ColorTheme.PRIMARY_DARK);
+
+    jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
+    jLabel1.setVerticalAlignment(SwingConstants.CENTER);
+}
+    
+    private void styleTreatmentLabels() {
+
+    styleTreatmentLabel(jLabel2);
+    styleTreatmentLabel(jLabel3);
+    styleTreatmentLabel(jLabel4);
+    styleTreatmentLabel(jLabel5);
+    styleTreatmentLabel(jLabel6);
+}
+
+private void styleTreatmentLabel(javax.swing.JLabel label) {
+
+    label.setFont(new Font("Segoe UI", Font.BOLD, 13));
+    label.setForeground(ColorTheme.TEXT);
+}
+
+private void styleTreatmentFields() {
+
+    styleTreatmentTextField(txtTreatmentId);
+    styleTreatmentTextField(txtTreatmentName);
+    styleTreatmentTextField(txtTreatmentCost);
+
+    // Auto-generated ID
+    txtTreatmentId.setBackground(ColorTheme.LIGHT_TEAL);
+    txtTreatmentId.setForeground(ColorTheme.SECONDARY_TEXT);
+
+    // Description
+    txtTreatmentDescription.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    txtTreatmentDescription.setForeground(ColorTheme.TEXT);
+    txtTreatmentDescription.setBackground(ColorTheme.WHITE);
+
+    txtTreatmentDescription.setLineWrap(true);
+    txtTreatmentDescription.setWrapStyleWord(true);
+
+    txtTreatmentDescription.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER, 1
+                    ),
+                    new EmptyBorder(8, 10, 8, 10)
+            )
+    );
+
+    jScrollPane1.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER, 1
+            )
+    );
+
+    jScrollPane1.getViewport().setBackground(
+            ColorTheme.WHITE
+    );
+}
+
+private void styleTreatmentTextField(JTextField field) {
+
+    field.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    field.setForeground(ColorTheme.TEXT);
+    field.setBackground(ColorTheme.WHITE);
+    field.setCaretColor(ColorTheme.PRIMARY);
+
+    field.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            ColorTheme.BORDER, 1
+                    ),
+                    new EmptyBorder(
+                            7, 10, 7, 10
+                    )
+            )
+    );
+}
+
+private void styleTreatmentCheckBox() {
+
+    chkTreatmentActive.setFont(
+            new Font("Segoe UI", Font.PLAIN, 13)
+    );
+
+    chkTreatmentActive.setForeground(
+            ColorTheme.TEXT
+    );
+
+    chkTreatmentActive.setBackground(
+            ColorTheme.BACKGROUND
+    );
+
+    chkTreatmentActive.setFocusPainted(false);
+}
+
+private void styleTreatmentButtons() {
+
+    styleTreatmentButton(
+            btnSaveTreatment,
+            "SAVE",
+            ColorTheme.PRIMARY,
+            ColorTheme.WHITE
+    );
+
+    styleTreatmentButton(
+            jButton2,
+            "UPDATE",
+            ColorTheme.GOLD,
+            ColorTheme.TEXT
+    );
+
+    styleTreatmentButton(
+            jButton3,
+            "CLEAR",
+            ColorTheme.SECONDARY_TEXT,
+            ColorTheme.WHITE
+    );
+
+    styleTreatmentButton(
+            btnBack,
+            "←  BACK",
+            ColorTheme.PRIMARY_DARK,
+            ColorTheme.WHITE
+    );
+}
+
+private void styleTreatmentButton(
+        JButton button,
+        String text,
+        Color background,
+        Color foreground) {
+
+    button.setText(text);
+
+    button.setFont(
+            new Font("Segoe UI", Font.BOLD, 12)
+    );
+
+    button.setForeground(foreground);
+    button.setBackground(background);
+
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setOpaque(true);
+
+    button.setCursor(
+            new Cursor(Cursor.HAND_CURSOR)
+    );
+
+    button.setBorder(
+            new EmptyBorder(
+                    9, 15, 9, 15
+            )
+    );
+}
+
+private void styleTreatmentTable() {
+
+    tblTreatments.setFont(
+            new Font("Segoe UI", Font.PLAIN, 12)
+    );
+
+    tblTreatments.setForeground(
+            ColorTheme.TEXT
+    );
+
+    tblTreatments.setBackground(
+            ColorTheme.WHITE
+    );
+
+    tblTreatments.setRowHeight(30);
+
+    tblTreatments.setGridColor(
+            ColorTheme.BORDER
+    );
+
+    tblTreatments.setShowVerticalLines(false);
+    tblTreatments.setShowHorizontalLines(true);
+
+    tblTreatments.setSelectionBackground(
+            ColorTheme.LIGHT_TEAL
+    );
+
+    tblTreatments.setSelectionForeground(
+            ColorTheme.TEXT
+    );
+
+    tblTreatments.setFillsViewportHeight(true);
+
+
+    JTableHeader header =
+        tblTreatments.getTableHeader();
+
+    header.setReorderingAllowed(false);
+
+    header.setPreferredSize(
+        new Dimension(
+                header.getPreferredSize().width,
+                42
+        )
+    );
+
+    // Custom header renderer
+    DefaultTableCellRenderer headerRenderer =
+        new DefaultTableCellRenderer();
+
+    headerRenderer.setHorizontalAlignment(
+        SwingConstants.LEFT
+    );
+
+    headerRenderer.setVerticalAlignment(
+        SwingConstants.CENTER
+    );
+
+    headerRenderer.setFont(
+        new Font(
+                "Segoe UI",
+                Font.BOLD,
+                14
+        )
+    );
+
+    headerRenderer.setForeground(
+        ColorTheme.WHITE
+    );
+
+    headerRenderer.setBackground(
+        ColorTheme.PRIMARY_DARK
+   );
+
+    headerRenderer.setOpaque(true);
+
+    headerRenderer.setBorder(
+        BorderFactory.createMatteBorder(
+                0, 0, 2, 0,
+                ColorTheme.PRIMARY
+        )
+);
+
+    header.setDefaultRenderer(headerRenderer);
+
+    // Center Treatment ID
+    DefaultTableCellRenderer centerRenderer =
+            new DefaultTableCellRenderer();
+
+    centerRenderer.setHorizontalAlignment(
+            SwingConstants.CENTER
+    );
+
+    tblTreatments
+            .getColumnModel()
+            .getColumn(0)
+            .setCellRenderer(centerRenderer);
+
+
+    // Column widths
+    tblTreatments
+            .getColumnModel()
+            .getColumn(0)
+            .setPreferredWidth(70);
+
+    tblTreatments
+            .getColumnModel()
+            .getColumn(1)
+            .setPreferredWidth(130);
+
+    tblTreatments
+            .getColumnModel()
+            .getColumn(2)
+            .setPreferredWidth(90);
+
+    tblTreatments
+            .getColumnModel()
+            .getColumn(3)
+            .setPreferredWidth(220);
+
+    tblTreatments
+            .getColumnModel()
+            .getColumn(4)
+            .setPreferredWidth(100);
+
+
+    jScrollPane2.setBorder(
+            BorderFactory.createLineBorder(
+                    ColorTheme.BORDER,
+                    1
+            )
+    );
+
+    jScrollPane2.getViewport().setBackground(
+            ColorTheme.WHITE
+    );
 }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -190,10 +525,6 @@ private final ObjectMapper objectMapper =
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(242, 242, 242)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addGap(47, 47, 47)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -225,11 +556,13 @@ private final ObjectMapper objectMapper =
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(59, 59, 59)
                                 .addComponent(chkTreatmentActive)))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 503, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(80, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 403, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(64, 64, 64)
                 .addComponent(btnBack)
                 .addGap(131, 131, 131))
         );
@@ -242,7 +575,7 @@ private final ObjectMapper objectMapper =
                 .addComponent(jLabel1)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
+                        .addGap(63, 63, 63)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(txtTreatmentId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -271,9 +604,9 @@ private final ObjectMapper objectMapper =
                             .addComponent(jButton2)
                             .addComponent(jButton3)))
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         pack();
