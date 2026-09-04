@@ -40,20 +40,19 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="-2" pref="93" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="btnTreatments" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="btnDentists" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="btnReports" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="btnBilling" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="jButton1" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="btnAppointments" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Component id="btnPatients" alignment="0" min="-2" pref="137" max="-2" attributes="0"/>
-                      <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                          <Component id="btnLogout" min="-2" pref="137" max="-2" attributes="0"/>
-                          <Component id="btnUsers" min="-2" pref="137" max="-2" attributes="0"/>
-                      </Group>
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="btnTreatments" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnDentists" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnReports" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnBilling" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="jButton1" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnAppointments" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnPatients" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnLogout" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnUsers" alignment="1" pref="137" max="32767" attributes="0"/>
+                      <Component id="btnHelp" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace pref="50" max="32767" attributes="0"/>
               </Group>
@@ -78,7 +77,9 @@
                   <Component id="btnTreatments" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="btnUsers" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="45" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="btnHelp" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   <Component id="btnLogout" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -156,6 +157,14 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUsersActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnHelp">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Help"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnHelpActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

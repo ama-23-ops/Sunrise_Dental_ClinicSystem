@@ -25,6 +25,7 @@ com\sunrisedental\webservice\BillingResource.class
 com\sunrisedental\gui\PatientForm$2.class
 com\sunrisedental\webservice\DentistResource.class
 com\sunrisedental\gui\DentistForm$1.class
+com\sunrisedental\gui\HelpForm.class
 com\sunrisedental\model\User.class
 com\sunrisedental\util\Validator.class
 com\sunrisedental\App.class
